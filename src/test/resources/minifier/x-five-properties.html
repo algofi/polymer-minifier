@@ -1,0 +1,51 @@
+
+<dom-module id="x-five-properties">
+	<template>
+		<style>
+		</style>
+		{{sessionId}} [[friends]] 
+		
+		[[posts]] [[habilitation.id]]
+		
+		{{userId.name}}
+		<script>
+			Polymer( {
+				is:'x-five-properties',
+				properties: {
+					sessionId: Number,
+					userId: {
+						type: String,
+						notify: true,
+						readOnly: true,
+						observer: '_userIdChanged'
+					},
+					habilitation: {
+						type: Object
+					},
+					friends: {
+						type: Array
+					},
+					posts: {
+						type: Object
+					}
+				},
+				_userIdChanged: function() {
+					console.log( this.sessionId, this.userId, this.habilitation.id, this.friends.list, this.posts );
+				},
+				ready: function () {
+					var self = this;
+					this.addEventListener( 'tap', function ( e ) {
+						console.log( self.sessionId, self.userId, self.habilitation.id, self.friends.list, self.posts );
+					} );
+				},
+				created: function () {
+					var me = this;
+					this.addEventListener( 'tap', function ( e ) {
+						console.log( me.sessionId, me.userId, me.habilitation.id, me.friends.list, me.posts );
+					} );
+				}
+			} );
+			
+		</script>
+	</template>
+</dom-module>

@@ -1,0 +1,33 @@
+
+<dom-module id="x-five-properties">
+	<template>
+		<style>
+		</style>
+		<script>
+			Polymer( {
+				is:'x-five-properties',
+				properties: {
+					sessionId: Number,
+					userId: {
+						type: String,
+						notify: true,
+						readOnly: true,
+						observer: '_userIdChanged'
+					},
+					habilitation: {
+						type: Object
+					},
+					friends: {
+						type: Array
+					},
+					posts: {
+						type: Object
+					}
+				},
+				_userIdChanged: function() {
+				}
+			} );
+			
+		</script>
+	</template>
+</dom-module>

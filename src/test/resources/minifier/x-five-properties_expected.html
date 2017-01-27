@@ -1,0 +1,50 @@
+<dom-module id="x-five-properties">
+	<template>
+		<style>
+		</style>
+		{{a}} [[d]] 
+		
+		[[e]] [[c.id]]
+		
+		{{b.name}}
+		<script>
+			Polymer( {
+				is:'x-five-properties',
+				properties: {
+					a: Number,
+					b: {
+						type: String,
+						notify: true,
+						readOnly: true,
+						observer: '_userIdChanged'
+					},
+					c: {
+						type: Object
+					},
+					d: {
+						type: Array
+					},
+					e: {
+						type: Object
+					}
+				},
+				_userIdChanged: function() {
+					console.log( this.a, this.b, this.c.id, this.d.list, this.e );
+				},
+				ready: function () {
+					var self = this;
+					this.addEventListener( 'tap', function ( e ) {
+						console.log( self.a, self.b, self.c.id, self.d.list, self.e );
+					} );
+				},
+				created: function () {
+					var me = this;
+					this.addEventListener( 'tap', function ( e ) {
+						console.log( me.a, me.b, me.c.id, me.d.list, me.e );
+					} );
+				}
+			} );
+			
+		</script>
+	</template>
+</dom-module>
