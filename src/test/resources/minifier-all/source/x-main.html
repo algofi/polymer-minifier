@@ -1,0 +1,27 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<link rel="import" href="x-premier.html">
+<link rel="import" href="x-second.html">
+
+<dom-module id="x-main">
+	<template>
+		<x-premier user-id="{{userId}}"></x-premier>
+		<x-second friends="[[friends]]"></x-second>
+	</template>
+	<script>
+		Polymer( {
+			is: 'x-main',
+			properties: {
+				userId: String,
+				friends: {
+					type: Array,
+					value: [
+					    { name: 'Alice'},
+					    { name: 'Bob'},
+					    { name: 'Charles'},
+					]
+				}
+			}
+		} );
+	</script>
+</dom-module>

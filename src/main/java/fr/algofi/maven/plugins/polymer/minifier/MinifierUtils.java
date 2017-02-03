@@ -2,24 +2,31 @@ package fr.algofi.maven.plugins.polymer.minifier;
 
 public class MinifierUtils {
 
-	public static String extractScript(String content, String scriptPrologue) {
+	public static String extractScript(String content) {
 
-		final StringBuilder scriptBuilder = new StringBuilder(scriptPrologue);
-		final String[] lines = content.split("\n|\r|\n\r|\r\n");
-		boolean append = false;
-		for (int i = 0; i < lines.length; i++) {
-			if (lines[i].contains("Polymer")) {
-				append = true;
-			}
-			if (append && lines[i].contains("</script>")) {
-				append = false;
-			}
-			if (append) {
-				scriptBuilder.append(lines[i]).append("\n");
+		int start = content.indexOf("<script>");
+
+		if (start >= 0) {
+			int end = content.indexOf("</script>", start);
+			start = start + 8;
+			if ( end >= start ) {
+				return content.substring(start, end).trim();
+			} else {
+				throw new IllegalArgumentException("No closing script tag found");
 			}
 		}
 
-		return scriptBuilder.toString().trim();
+		// get the opening tag
+		start = content.indexOf("<script ");
+		// get the closing position
+		start = content.indexOf(">", start + 8);
+		int end = content.indexOf("</script>", start);
+		if (end >= start) {
+			return content.substring(start + 1, end).trim();
+		} else {
+			throw new IllegalArgumentException("No closing script tag found");
+		}
+
 	}
 
 }

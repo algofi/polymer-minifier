@@ -11,4 +11,14 @@ public class Utils {
 		final byte[] bytes = Files.readAllBytes(Paths.get(path));
 		return new String(bytes, Charset.defaultCharset());
 	}
+
+	public static PolymerComponent readComponent(final String path) throws IOException {
+		final String content = readContent(path);
+		PolymerComponent polymer = new PolymerComponent();
+		polymer.setPath(path);
+		polymer.setContent(content);
+		
+		return polymer;
+	}
+
 }

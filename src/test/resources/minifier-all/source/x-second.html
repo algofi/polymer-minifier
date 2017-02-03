@@ -1,0 +1,20 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+
+<dom-module id="x-second">
+	<template>
+	<p>Posts:</p>
+	<ul>
+		<template is="dom-repeat" items="[[friends]]">
+			<li>{{item.name}}</li>
+		</template>
+	</ul>
+	</template>
+	<script>
+		Polymer( {
+			is: 'x-second',
+			properties: {
+				friends: Array,
+			}
+		} );
+	</script>
+</dom-module>
