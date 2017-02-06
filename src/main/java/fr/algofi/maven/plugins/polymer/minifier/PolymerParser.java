@@ -1,5 +1,6 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -7,11 +8,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
@@ -41,25 +46,29 @@ public class PolymerParser {
 		this.scriptEngine = scriptEngine;
 	}
 
-	public PolymerComponent read(String path) throws IOException {
-		final byte[] bytes = Files.readAllBytes(Paths.get(path));
-		final String content = new String(bytes, Charset.defaultCharset());
+	public PolymerComponent read(final String path) throws IOException {
 
-		final String script = MinifierUtils.extractScript(content);
+		final Document document = Jsoup.parse(new File(path), Charset.defaultCharset().name());
+
+		final ScriptPart script = MinifierUtils.extractScript(document);
 
 		final PolymerComponent polymer = new PolymerComponent();
+		
+		String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
+		content = content.replaceAll("<link\\p{Blank}+rel=\"import\"[^>]+>", "");
+		polymer.setContent(content.trim());
 
 		try {
-			final List<String> properties = extractPolymerProperties(script);
+			final List<String> properties = extractPolymerProperties(script.getScript());
 			polymer.setProperties(properties);
-			final String name = extractPolymerName(script);
+			final String name = extractPolymerName(script.getScript());
 			polymer.setName(name);
 		} catch (ScriptException e) {
 			// exception ignored
 			System.out.println("[WARN] cannot parse the file : " + path + " . Cause : " + e.getMessage());
 		}
 
-		final List<PolymerComponent> imports = extractImports(path, content);
+		final List<PolymerComponent> imports = extractImports(path, document);
 
 		polymer.setPath(path);
 		polymer.setImports(imports);
@@ -67,18 +76,21 @@ public class PolymerParser {
 		return polymer;
 	}
 
-	private List<PolymerComponent> extractImports(String path, String content) throws IOException {
+	private List<PolymerComponent> extractImports(final String path, final Document document) throws IOException {
 		final List<PolymerComponent> imports = new ArrayList<>();
 
-		final Pattern pattern = Pattern.compile("<link rel=\"import\" href=\"([^\"]+)\"");
-		final Matcher matcher = pattern.matcher(content);
-		while (matcher.find()) {
-			final String href = matcher.group(1);
-			// TODO import relative to the current path
-			final String importPath = Paths.get(path, "..").normalize().resolve(Paths.get(href)).normalize().toString();
+		final Elements links = document.getElementsByTag("link");
 
-			final PolymerComponent polymer = read(importPath);
-			imports.add(polymer);
+		for (Element link : links) {
+			final String rel = link.attr("rel");
+			if ("import".equals(rel)) {
+				final String href = link.attr("href");
+				final String importPath = Paths.get(path, "..").normalize().resolve(Paths.get(href)).normalize()
+						.toString();
+
+				final PolymerComponent polymer = read(importPath);
+				imports.add(polymer);
+			}
 		}
 
 		return imports;

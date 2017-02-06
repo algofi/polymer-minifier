@@ -70,7 +70,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAnEmptyListOfImportsDependenciesWhenNoImports() throws IOException, ScriptException {
+	public void shouldReturnAnSingleListOfImportsDependenciesWhenOnlyPolymerImport() throws IOException, ScriptException {
 		// input
 		final String path = "src/test/resources/minifier-all/source/x-premier.html";
 		// call

@@ -90,21 +90,4 @@ public class PolymerMinifierTest {
 		assertEquals("e", polymer.getMiniedProperties().get("posts"));
 	}
 
-	@Test
-	public void jsScriptShouldCompile() {
-		final Compiler compiler = new Compiler();
-
-		final CompilerOptions options = new CompilerOptions();
-		CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
-
-		final List<SourceFile> externs = Collections.emptyList();
-		final List<SourceFile> inputs = new ArrayList<>();
-		inputs.add(SourceFile.fromFile(new File("src/test/resources/minifier/hello.js")));
-
-		final Result result = compiler.compile(externs, inputs, options);
-
-		System.out.println(compiler.toSource());
-
-	}
-
 }

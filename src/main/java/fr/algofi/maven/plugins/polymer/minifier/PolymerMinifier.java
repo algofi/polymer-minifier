@@ -9,6 +9,11 @@ import java.util.regex.Pattern;
 
 public class PolymerMinifier {
 
+	/**
+	 * minify a polymer component
+	 * @param polymer
+	 * @throws MinifierException
+	 */
 	public void minify(final PolymerComponent polymer) throws MinifierException {
 
 		final List<String> shortNames = new MiniPropertyProvider().provide();
