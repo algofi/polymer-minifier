@@ -9,7 +9,7 @@ import java.util.List;
  * @author cjechoux
  *
  */
-public class MiniPropertyProvider {
+public class MiniNameProvider {
 
 	/**
 	 * initial value to build the list of strings

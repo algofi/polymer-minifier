@@ -11,12 +11,13 @@ public class PolymerMinifier {
 
 	/**
 	 * minify a polymer component
+	 * 
 	 * @param polymer
 	 * @throws MinifierException
 	 */
 	public void minify(final PolymerComponent polymer) throws MinifierException {
 
-		final List<String> shortNames = new MiniPropertyProvider().provide();
+		final List<String> shortNames = new MiniNameProvider().provide();
 		final Iterator<String> shortNameIterator = shortNames.iterator();
 
 		// initial value
@@ -31,7 +32,7 @@ public class PolymerMinifier {
 
 				minifiedProperties.put(propertyName, miniPropertyName);
 
-				final String miniContent = minify(polymer.getMinifiedContent(), propertyName, miniPropertyName);
+				final String miniContent = minify(polymer, propertyName, miniPropertyName);
 				polymer.setMiniContent(miniContent);
 			}
 		}
@@ -49,14 +50,30 @@ public class PolymerMinifier {
 
 	}
 
-	private String minify(String content, String propertyName, String miniPropertyName) {
+	private String minify(PolymerComponent polymer, String propertyName, String miniPropertyName) {
+
+		String content = polymer.getMinifiedContent();
 
 		content = minifyProperties(content, propertyName, miniPropertyName);
-
 		content = minifyBlanks(content);
+		content = minifyName(content, polymer.getName(), polymer.getMiniName());
 
 		return content;
 
+	}
+
+	private String minifyName(String content, String name, String miniName) {
+
+		// replace <dom-module > id attribute
+		content = content.replaceAll("<dom-module\\p{Blank}+id=\"" + name + "\"",
+				"<dom-module id=\"" + miniName + "\"");
+
+		content = content.replaceAll("is:\\p{Blank}+['\"]" + name + "['\"]", "is:'" + miniName + "'");
+
+		content = content.replaceAll("<" + name, "\\<" + miniName);
+		content = content.replaceAll("</" + name + ">", "</" + miniName + ">");
+
+		return content;
 	}
 
 	private String minifyBlanks(String content) {

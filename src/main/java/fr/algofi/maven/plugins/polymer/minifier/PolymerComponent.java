@@ -13,6 +13,7 @@ public class PolymerComponent {
 	private String miniContent;
 	private Map<String, String> minifiedProperties;
 	private List<PolymerComponent> imports = new ArrayList<>();
+	private String miniName;
 
 	public void setProperties(List<String> properties) {
 		this.properties = properties;
@@ -80,4 +81,22 @@ public class PolymerComponent {
 		return path;
 	}
 
+	public void setMiniName(String miniName) {
+		this.miniName = miniName;
+	}
+	
+	public String getMiniName() {
+		return miniName;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "PolymerComponent [name=" + name + "]";
+	}
+
+	
+	
 }

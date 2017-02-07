@@ -23,7 +23,7 @@ public class ElementsMinifierTest {
 	}
 
 	@Test
-	public void shouldReturnAListOfImports() throws IOException {
+	public void shouldReturnAListOfImports() throws IOException, MinifierException {
 
 		// expected content :
 		final Path expectedPath = Paths.get("src", "test", "resources", "minifier-all", "target",

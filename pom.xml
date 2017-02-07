@@ -4,7 +4,7 @@
 	<groupId>fr.algofi.maven.plugins</groupId>
 	<artifactId>polymer-minifier</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Minify properties name and usage</name>
+	<name>Minify Polymer Project</name>
 
 	<dependencies>
 		<dependency>
@@ -18,8 +18,22 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.8.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.javascript</groupId>
+			<artifactId>closure-compiler</artifactId>
+			<version>v20170124</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>jdk.nashorn</groupId>
+			<artifactId>jdk-nashorn</artifactId>
+			<version>1.8.0_77</version>
+			<scope>system</scope>
+			<systemPath>${java.home}/lib/ext/nashorn.jar</systemPath>
+		</dependency>
+		
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>

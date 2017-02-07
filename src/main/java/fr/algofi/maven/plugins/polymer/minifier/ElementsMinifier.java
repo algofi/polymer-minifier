@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -17,53 +20,84 @@ import org.jsoup.select.Elements;
 
 public class ElementsMinifier {
 
+	private PolymerMinifier minifier = new PolymerMinifier();
 	private PolymerParser parser;
+	private Iterator<String> componentNameIterator;
 
 	public ElementsMinifier() {
 		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		parser = new PolymerParser(scriptEngine);
+
+		final MiniNameProvider provider = new MiniNameProvider();
+		final List<String> componentNames = provider.provide().stream()
+				.collect(Collectors.mapping(name -> "x-" + name, Collectors.toList()));
+		componentNameIterator = componentNames.iterator();
 	}
 
-	public String minimize(final Path path) throws IOException {
+	public String minimize(final Path path) throws IOException, MinifierException {
 		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
 
 		// component already appended
-		final Set<String> appended = new HashSet<>();
+		final Map<String, PolymerComponent> components = getAndOrderAllComponents(path);
 
-		final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
-		final Elements links = document.getElementsByTag("link");
-		for (Element link : links) {
-			final String rel = link.attr("rel");
-			if ("import".equals(rel)) {
-				final String href = link.attr("href");
-				final String importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize().toString();
-
-				final PolymerComponent component = parser.read(importPath);
-
-				appendComponent(component, builder, appended);
-
-			}
-		}
+		appendAllComponents(components, builder);
 
 		builder.append("</div></body></html>");
 
 		return builder.toString();
 	}
 
-	private void appendComponent(final PolymerComponent component, final StringBuilder builder,
-			final Set<String> appended) {
+	private void appendAllComponents(final Map<String, PolymerComponent> components, final StringBuilder builder)
+			throws MinifierException {
+
+		for (String key : components.keySet()) {
+			final PolymerComponent component = components.get(key);
+
+			minifier.minify(component, allShortComponentName);
+
+			builder.append(component.getMinifiedContent());
+		}
+
+	}
+
+	private Map<String, PolymerComponent> getAndOrderAllComponents(final Path path) throws IOException {
+		final Map<String, PolymerComponent> components = new LinkedHashMap<>();
+		final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
+
+		final Elements links = document.getElementsByTag("link");
+		for (Element link : links) {
+			final String rel = link.attr("rel");
+			if ("import".equals(rel)) {
+				final String href = link.attr("href");
+				final String importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize().toString();
+				System.out.println("path = " + importPath);
+				final PolymerComponent component = parser.read(importPath);
+				appendComponent(component, components);
+
+			}
+		}
+
+		return components;
+	}
+
+	private void appendComponent(final PolymerComponent component, Map<String, PolymerComponent> components) {
 
 		// append import, and then the components itself
 		for (final PolymerComponent importedComponent : component.getImports()) {
-			appendComponent(importedComponent, builder, appended);
+			appendComponent(importedComponent, components);
 		}
 
 		// append myself
-		if (!appended.contains(component.getPath())) {
+		if (!components.containsKey(component.getPath())) {
 
-			builder.append(component.getContent() );
-
-			appended.add(component.getPath());
+			if (component.getName() != null) {
+				if (componentNameIterator.hasNext()) {
+					component.setMiniName(componentNameIterator.next());
+					System.out.println(component.getName() + " -> " + component.getMiniName());
+				}
+			}
+			// minify component name
+			components.put(component.getPath(), component);
 		}
 
 	}
