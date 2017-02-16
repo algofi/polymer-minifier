@@ -59,7 +59,7 @@ public class PolymerParser {
 		polymer.setContent(content.trim());
 
 		try {
-			final List<String> properties = extractPolymerProperties(script.getScript());
+			final List<PolymerProperty> properties = extractPolymerProperties(script.getScript());
 			polymer.setProperties(properties);
 			final String name = extractPolymerName(script.getScript());
 			polymer.setName(name);
@@ -100,14 +100,20 @@ public class PolymerParser {
 		return (String) scriptEngine.eval(COMPONENT_NAME_SCRIPT_PROLOGUE + script);
 	}
 
-	private List<String> extractPolymerProperties(String script) throws ScriptException {
-		final List<String> properties = new ArrayList<>();
+	private List<PolymerProperty> extractPolymerProperties(String script) throws ScriptException {
+		final List<PolymerProperty> properties = new ArrayList<>();
 
 		final ScriptObjectMirror mirror = (ScriptObjectMirror) scriptEngine.eval(PROPERTIES_SCRIPT_PROLOGUE + script);
 		if (mirror != null) {
 			final String[] propertiesName = mirror.getOwnKeys(true);
 			final List<String> propertiesFound = Arrays.asList(propertiesName);
-			properties.addAll(propertiesFound);
+			
+			for( final String propertyName : propertiesFound ) {
+				final PolymerProperty property = new PolymerProperty();
+				property.setName( propertyName );
+				properties.add(property);
+			}
+			
 		}
 
 		return properties;

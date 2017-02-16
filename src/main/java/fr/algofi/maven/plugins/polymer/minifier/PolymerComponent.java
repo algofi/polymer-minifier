@@ -6,20 +6,22 @@ import java.util.Map;
 
 public class PolymerComponent {
 
-	private List<String> properties = new ArrayList<>();
 	private String name;
 	private String path;
 	private String content;
 	private String miniContent;
-	private Map<String, String> minifiedProperties;
+	
+	private List<PolymerProperty> properties = new ArrayList<>();
+//	private Map<String, String> minifiedProperties;
+	
 	private List<PolymerComponent> imports = new ArrayList<>();
 	private String miniName;
 
-	public void setProperties(List<String> properties) {
+	public void setProperties(List<PolymerProperty> properties) {
 		this.properties = properties;
 	}
 
-	public List<String> getProperties() {
+	public List<PolymerProperty> getProperties() {
 		return properties;
 	}
 
@@ -61,13 +63,13 @@ public class PolymerComponent {
 		this.miniContent = miniContent;
 	}
 
-	public Map<String, String> getMiniedProperties() {
-		return minifiedProperties;
-	}
-
-	public void setMinifiedProperties(Map<String, String> minifiedProperties) {
-		this.minifiedProperties = minifiedProperties;
-	}
+//	public Map<String, String> getMiniedProperties() {
+//		return minifiedProperties;
+//	}
+//
+//	public void setMinifiedProperties(Map<String, String> minifiedProperties) {
+//		this.minifiedProperties = minifiedProperties;
+//	}
 
 	public List<PolymerComponent> getImports() {
 		return imports;

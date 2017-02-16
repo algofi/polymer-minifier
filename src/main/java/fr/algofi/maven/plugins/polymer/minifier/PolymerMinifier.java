@@ -1,5 +1,7 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PolymerMinifier {
+
+	private Collection<PolymerComponent> dependencies = new ArrayList<>();
 
 	/**
 	 * minify a polymer component
@@ -26,18 +30,19 @@ public class PolymerMinifier {
 		final Map<String, String> minifiedProperties = new LinkedHashMap<>();
 
 		if (!polymer.getProperties().isEmpty()) {
-			for (final String propertyName : polymer.getProperties()) {
+			for (final PolymerProperty property : polymer.getProperties()) {
 
+				final String propertyName = property.getName();
 				final String miniPropertyName = getNextMiniPropertyName(shortNameIterator);
 
 				minifiedProperties.put(propertyName, miniPropertyName);
+				property.setMiniName(miniPropertyName);
 
 				final String miniContent = minify(polymer, propertyName, miniPropertyName);
 				polymer.setMiniContent(miniContent);
 			}
 		}
 
-		polymer.setMinifiedProperties(minifiedProperties);
 	}
 
 	private String getNextMiniPropertyName(final Iterator<String> iterator) throws MinifierException {
@@ -57,21 +62,63 @@ public class PolymerMinifier {
 		content = minifyProperties(content, propertyName, miniPropertyName);
 		content = minifyBlanks(content);
 		content = minifyName(content, polymer.getName(), polymer.getMiniName());
+		content = minifyDependenciesName(content, dependencies);
 
 		return content;
 
 	}
 
+	private String minifyDependenciesName(String content, final Collection<PolymerComponent> dependencies) {
+
+		for (PolymerComponent dependency : dependencies) {
+			final String dependencyName = dependency.getName();
+			final String dependencyMiniName = dependency.getMiniName();
+			// replace HTML opening tags
+			content = content.replaceAll("<" + dependencyName, "\\<" + dependencyMiniName);
+			// replace HTML closing tags
+			content = content.replaceAll("</" + dependencyName + ">", "</" + dependencyMiniName + ">");
+			// replace custom element attributes
+
+			// final Pattern pattern = Pattern.compile("(<" + dependencyMiniName
+			// + "([a-z\\- ]+\\$?=['\"][^'\"]*['\"])*>.*</" + dependencyMiniName
+			// + ">)");
+			final Pattern pattern = Pattern
+					.compile("(<" + dependencyMiniName + ".*>[\n\\r.]*</" + dependencyMiniName + ">)");
+			final Matcher matcher = pattern.matcher(content);
+			while (matcher.find()) {
+				final String find = matcher.group(1);
+				System.out.println("GROUP   = " + find);
+
+				String miniTag = find;
+				for (PolymerProperty property : dependency.getProperties()) {
+					miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
+					miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
+				}
+
+				// TODO replace find by minitag
+				content = content.replace(find, miniTag);
+			}
+
+			// TODO replace document.createElement( 'my-custom-tag' ) call
+		}
+
+		return content;
+	}
+
 	private String minifyName(String content, String name, String miniName) {
 
-		// replace <dom-module > id attribute
-		content = content.replaceAll("<dom-module\\p{Blank}+id=\"" + name + "\"",
-				"<dom-module id=\"" + miniName + "\"");
+		if (miniName != null) {
 
-		content = content.replaceAll("is:\\p{Blank}+['\"]" + name + "['\"]", "is:'" + miniName + "'");
+			// minify polymer component name
 
-		content = content.replaceAll("<" + name, "\\<" + miniName);
-		content = content.replaceAll("</" + name + ">", "</" + miniName + ">");
+			// 1) replace <dom-module > id attribute
+			content = content.replaceAll("<dom-module\\p{Blank}+id=\"" + name + "\"",
+					"<dom-module id=\"" + miniName + "\"");
+
+			// 2) minify javascript polymer component
+			content = content.replaceAll("is:\\p{Blank}+['\"]" + name + "['\"]", "is:'" + miniName + "'");
+
+		}
 
 		return content;
 	}
@@ -112,4 +159,7 @@ public class PolymerMinifier {
 		return content;
 	}
 
+	public void setDependencies(Collection<PolymerComponent> dependencies) {
+		this.dependencies = dependencies;
+	}
 }

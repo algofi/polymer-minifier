@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -40,10 +39,6 @@ public class ElementsMinifierTest {
 		// asasertions
 		assertNotNull(minimized);
 		assertEquals( expectedContent, minimized );
-
-		// TODO should concateneate all imports
-
-		// TODO should minify all of them
-
+		
 	}
 }

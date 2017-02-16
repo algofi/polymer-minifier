@@ -5,12 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
-import org.jsoup.select.NodeVisitor;
 
 import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.Compiler;
@@ -34,7 +31,6 @@ public class MinifierUtils {
 		final Element script = scripts.get(0);
 		scriptPart.setScript(script.html());
 
-		
 		return scriptPart;
 
 		// int start = document.indexOf("<script>");
@@ -83,6 +79,37 @@ public class MinifierUtils {
 		/* final Result result = */compiler.compile(externs, inputs, options);
 
 		System.out.println(compiler.toSource());
+	}
+
+	/**
+	 * convert a property name to an attribute
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static String propertyToAttribute(String name) {
+
+		if (name == null) {
+			throw new IllegalArgumentException("property name should not be null");
+		}
+
+		final StringBuilder builder = new StringBuilder();
+
+		final char[] chars = name.toCharArray();
+
+		for (int i = 0; i < chars.length; i++) {
+			final Character c = chars[i];
+			if (Character.isUpperCase(c)) {
+				if (i > 0) {
+					builder.append('-');
+				}
+				builder.append(Character.toLowerCase(c));
+			} else {
+				builder.append(c);
+			}
+		}
+
+		return builder.toString();
 	}
 
 }

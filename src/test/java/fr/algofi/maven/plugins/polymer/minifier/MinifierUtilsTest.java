@@ -1,5 +1,6 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
+import static fr.algofi.maven.plugins.polymer.minifier.MinifierUtils.propertyToAttribute;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -23,8 +24,8 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals("", scriptPart.getScript());
-//		assertEquals(8, scriptPart.getStart());
-//		assertEquals(8, scriptPart.getEnd());
+		// assertEquals(8, scriptPart.getStart());
+		// assertEquals(8, scriptPart.getEnd());
 	}
 
 	@Test
@@ -36,8 +37,8 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals("", scriptPart.getScript());
-//		assertEquals(8, scriptPart.getStart());
-//		assertEquals(11, scriptPart.getEnd());
+		// assertEquals(8, scriptPart.getStart());
+		// assertEquals(11, scriptPart.getEnd());
 	}
 
 	@Test
@@ -49,8 +50,8 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals("console.log( 'hello world' );", scriptPart.getScript());
-//		assertEquals(8, scriptPart.getStart());
-//		assertEquals(37, scriptPart.getEnd());
+		// assertEquals(8, scriptPart.getStart());
+		// assertEquals(37, scriptPart.getEnd());
 	}
 
 	@Test
@@ -62,8 +63,8 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals("console.log( 'hello world' );", scriptPart.getScript());
-//		assertEquals(30, scriptPart.getStart());
-//		assertEquals(60, scriptPart.getEnd());
+		// assertEquals(30, scriptPart.getStart());
+		// assertEquals(60, scriptPart.getEnd());
 	}
 
 	@Test
@@ -75,8 +76,8 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals("console.log( 'hello world' );", scriptPart.getScript());
-//		assertEquals(30, scriptPart.getStart());
-//		assertEquals(64, scriptPart.getEnd());
+		// assertEquals(30, scriptPart.getStart());
+		// assertEquals(64, scriptPart.getEnd());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -113,6 +114,19 @@ public class MinifierUtilsTest {
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
 		// assertions
 		assertEquals(expectedJavascript, scriptPart.getScript());
+	}
+
+	@Test
+	public void shouldConvertAPropertyToAnAttributeName() {
+		assertEquals("a", propertyToAttribute("a"));
+		assertEquals("sessionid", propertyToAttribute("sessionid"));
+		assertEquals("session-id", propertyToAttribute("sessionId"));
+		assertEquals("session-id", propertyToAttribute("SessionId"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowAnExceptionIfNameIsNull() {
+		propertyToAttribute(null);
 	}
 
 }

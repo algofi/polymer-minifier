@@ -45,8 +45,10 @@ public class PolymerParsedTest {
 		// assertions
 		assertNotNull(polymer.getProperties());
 		assertFalse(polymer.getProperties().isEmpty());
+		
 		assertEquals(1, polymer.getProperties().size());
-		assertEquals("sessionId", polymer.getProperties().get(0));
+		assertEquals("sessionId", polymer.getProperties().get(0).getName() );
+		
 		assertEquals("x-one-properties", polymer.getName());
 	}
 
@@ -60,11 +62,11 @@ public class PolymerParsedTest {
 		assertNotNull(polymer.getProperties());
 		assertFalse(polymer.getProperties().isEmpty());
 		assertEquals(5, polymer.getProperties().size());
-		assertEquals("sessionId", polymer.getProperties().get(0));
-		assertEquals("userId", polymer.getProperties().get(1));
-		assertEquals("habilitation", polymer.getProperties().get(2));
-		assertEquals("friends", polymer.getProperties().get(3));
-		assertEquals("posts", polymer.getProperties().get(4));
+		assertEquals("sessionId", polymer.getProperties().get(0).getName());
+		assertEquals("userId", polymer.getProperties().get(1).getName());
+		assertEquals("habilitation", polymer.getProperties().get(2).getName());
+		assertEquals("friends", polymer.getProperties().get(3).getName());
+		assertEquals("posts", polymer.getProperties().get(4).getName());
 
 		assertEquals("x-five-properties", polymer.getName());
 	}
@@ -95,7 +97,7 @@ public class PolymerParsedTest {
 		assertEquals("src/test/resources/minifier-all/source/x-premier.html".replace('/', '\\'), premier.getPath());
 		assertNotNull(premier.getProperties());
 		assertEquals(1, premier.getProperties().size());
-		assertEquals("userId", premier.getProperties().get(0));
+		assertEquals("userId", premier.getProperties().get(0).getName());
 		assertEquals("x-premier", premier.getName());
 		assertEquals(1, premier.getImports().size());
 
@@ -103,7 +105,7 @@ public class PolymerParsedTest {
 		assertEquals("src/test/resources/minifier-all/source/x-second.html".replace('/', '\\'), second.getPath());
 		assertNotNull(second.getProperties());
 		assertEquals(1, second.getProperties().size());
-		assertEquals("friends", second.getProperties().get(0));
+		assertEquals("friends", second.getProperties().get(0).getName());
 		assertEquals("x-second", second.getName());
 		assertEquals(1, second.getImports().size());
 

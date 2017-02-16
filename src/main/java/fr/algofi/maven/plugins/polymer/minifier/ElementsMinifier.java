@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ElementsMinifier {
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
 
+
 	public ElementsMinifier() {
 		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		parser = new PolymerParser(scriptEngine);
@@ -39,6 +41,12 @@ public class ElementsMinifier {
 
 		// component already appended
 		final Map<String, PolymerComponent> components = getAndOrderAllComponents(path);
+		
+		// Dependencies that only create new element
+		final Collection<PolymerComponent> dependencyElements = components.values().stream().filter( c -> c.getName() != null ).collect(Collectors.toList()); 
+		
+		// give to the minifier a collection of all dependencies
+		minifier.setDependencies( dependencyElements );
 
 		appendAllComponents(components, builder);
 
@@ -53,7 +61,7 @@ public class ElementsMinifier {
 		for (String key : components.keySet()) {
 			final PolymerComponent component = components.get(key);
 
-			minifier.minify(component, allShortComponentName);
+			minifier.minify(component);
 
 			builder.append(component.getMinifiedContent());
 		}
@@ -102,4 +110,7 @@ public class ElementsMinifier {
 
 	}
 
+	
 }
+
+
