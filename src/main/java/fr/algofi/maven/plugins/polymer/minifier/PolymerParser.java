@@ -18,6 +18,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
+import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
+import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 /**
