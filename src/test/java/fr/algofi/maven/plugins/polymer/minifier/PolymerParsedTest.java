@@ -14,6 +14,8 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+
 public class PolymerParsedTest {
 
 	private PolymerParser sut;
