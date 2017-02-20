@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
+
 public class ElementsMinifierTest {
 
 	private ElementsMinifier sut;
@@ -33,7 +35,6 @@ public class ElementsMinifierTest {
 		final Path path = Paths.get("src", "test", "resources", "minifier-all", "source", "elements.html");
 
 		// call
-		// href imports
 		final String minimized = sut.minimize(path);
 
 		// asasertions
