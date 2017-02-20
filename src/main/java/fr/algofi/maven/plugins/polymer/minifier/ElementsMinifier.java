@@ -19,6 +19,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
+
 public class ElementsMinifier {
 
 	private PolymerMinifier minifier = new PolymerMinifier();
