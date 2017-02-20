@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import fr.algofi.maven.plugins.polymer.minifier.MiniNameProvider;
+import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
 
 public class MiniPropertyProviderTest {
 
