@@ -36,6 +36,7 @@ public class ElementsMinifier {
 	private Document indexDocument;
 	private Path importPath;
 	private String importHref;
+	private String buildHref;
 	private String importHtml;
 
 	public ElementsMinifier() {
@@ -71,6 +72,7 @@ public class ElementsMinifier {
 		final MiniElements minimized = new MiniElements();
 		minimized.setContent(minifiedContent);
 		minimized.setIndexContent(miniIndex);
+		minimized.setImportBuildHref(buildHref);
 
 		return minimized;
 	}
@@ -92,7 +94,7 @@ public class ElementsMinifier {
 
 	private String changeImportLink(String indexContent) {
 
-		final String buildHref = importHref.replaceFirst(".html", ".build.html");
+		buildHref = importHref.replaceFirst(".html", ".build.html");
 		//indexContent = indexContent.replaceFirst(importHtml.substring(1, importHtml.length() - 1), "link rel=\"import\" href=\"" + buildHref + "\"");
 		indexContent = indexContent.replaceFirst(importHtml, "<link rel=\"import\" href=\"" + buildHref + "\">");
 

@@ -30,14 +30,13 @@ public class ElementsMinifierTest {
 		// expected content :
 		final Path expectedContentPath = Paths.get("src", "test", "resources", "minifier-all", "target",
 				"elements.build.html");
-		final String expectedContent = Files.readAllLines(expectedContentPath).stream().collect(Collectors.joining("\n"));
+		final String expectedContent = Files.readAllLines(expectedContentPath).stream()
+				.collect(Collectors.joining("\n"));
 		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "target",
 				"index.build.html");
 		final String expectedIndex = Files.readAllLines(expectedIndexPath).stream().collect(Collectors.joining("\n"));
 
-		// input 
-		// main imports
-		final Path path = Paths.get("src", "test", "resources", "minifier-all", "source", "elements.html");
+		// input
 		// main entry point for the imports above
 		final Path index = Paths.get("src", "test", "resources", "minifier-all", "source", "index.html");
 
@@ -46,10 +45,9 @@ public class ElementsMinifierTest {
 
 		// asasertions
 		assertNotNull(minimized);
-		assertEquals( expectedContent, minimized.getContent() );
-		assertEquals( expectedIndex, minimized.getIndexContent() );
+		assertEquals(expectedContent, minimized.getContent());
+		assertEquals(expectedIndex, minimized.getIndexContent());
+		assertEquals("elements.build.html", minimized.getImportBuildHref());
 
-		//assertNotNull(minimized);
-		
 	}
 }
