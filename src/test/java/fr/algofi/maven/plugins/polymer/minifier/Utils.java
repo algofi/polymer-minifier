@@ -5,6 +5,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+
 public class Utils {
 
 	public static String readContent(final String path) throws IOException {
