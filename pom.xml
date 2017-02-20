@@ -5,7 +5,7 @@
 	<artifactId>polymer-minifier</artifactId>
 	<version>1.0.0</version>
 	<name>Minify Polymer Project</name>
- 	<packaging>maven-plugin</packaging>
+	<packaging>maven-plugin</packaging>
 
 	<dependencies>
 		<dependency>
@@ -75,6 +75,30 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
