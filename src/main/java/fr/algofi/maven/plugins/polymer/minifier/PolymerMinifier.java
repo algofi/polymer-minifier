@@ -13,6 +13,7 @@ import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
+import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class PolymerMinifier {
 
@@ -69,7 +70,7 @@ public class PolymerMinifier {
 
 		content = minifyProperties(content, propertyName, miniPropertyName);
 		//content = minifyBlanks(content);
-		content = minifyName(content, polymer.getName(), polymer.getMiniName());
+		content = MinifierUtils.minifyName(content, polymer.getName(), polymer.getMiniName());
 		content = minifyDependenciesName(content, dependencies);
 
 		return content;
@@ -79,57 +80,15 @@ public class PolymerMinifier {
 	private String minifyDependenciesName(String content, final Collection<PolymerComponent> dependencies) {
 
 		for (PolymerComponent dependency : dependencies) {
-			final String dependencyName = dependency.getName();
-			final String dependencyMiniName = dependency.getMiniName();
-			// replace HTML opening tags
-			content = content.replaceAll("<" + dependencyName, "\\<" + dependencyMiniName);
-			// replace HTML closing tags
-			content = content.replaceAll("</" + dependencyName + ">", "</" + dependencyMiniName + ">");
-			// replace custom element attributes
-
-			// final Pattern pattern = Pattern.compile("(<" + dependencyMiniName
-			// + "([a-z\\- ]+\\$?=['\"][^'\"]*['\"])*>.*</" + dependencyMiniName
-			// + ">)");
-			final Pattern pattern = Pattern
-					.compile("(<" + dependencyMiniName + ".*>[\n\\r.]*</" + dependencyMiniName + ">)");
-			final Matcher matcher = pattern.matcher(content);
-			while (matcher.find()) {
-				final String find = matcher.group(1);
-				System.out.println("GROUP   = " + find);
-
-				String miniTag = find;
-				for (PolymerProperty property : dependency.getProperties()) {
-					miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
-					miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
-				}
-
-				// TODO replace find by minitag
-				content = content.replace(find, miniTag);
-			}
-
-			// TODO replace document.createElement( 'my-custom-tag' ) call
+			content = MinifierUtils.minifyDependency(content, dependency);
 		}
 
 		return content;
 	}
 
-	private String minifyName(String content, String name, String miniName) {
+	
 
-		if (miniName != null) {
-
-			// minify polymer component name
-
-			// 1) replace <dom-module > id attribute
-			content = content.replaceAll("<dom-module\\p{Blank}+id=\"" + name + "\"",
-					"<dom-module id=\"" + miniName + "\"");
-
-			// 2) minify javascript polymer component
-			content = content.replaceAll("is:\\p{Blank}+['\"]" + name + "['\"]", "is:'" + miniName + "'");
-
-		}
-
-		return content;
-	}
+	
 
 	private String minifyBlanks(String content) {
 		// remove empty lines

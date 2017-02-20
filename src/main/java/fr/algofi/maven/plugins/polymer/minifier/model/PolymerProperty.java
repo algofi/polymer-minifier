@@ -1,4 +1,4 @@
-package fr.algofi.maven.plugins.polymer.minifier;
+package fr.algofi.maven.plugins.polymer.minifier.model;
 
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 

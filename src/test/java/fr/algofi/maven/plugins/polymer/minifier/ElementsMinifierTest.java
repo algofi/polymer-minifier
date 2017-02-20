@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 
 public class ElementsMinifierTest {
@@ -27,19 +28,28 @@ public class ElementsMinifierTest {
 	public void shouldReturnAListOfImports() throws IOException, MinifierException {
 
 		// expected content :
-		final Path expectedPath = Paths.get("src", "test", "resources", "minifier-all", "target",
+		final Path expectedContentPath = Paths.get("src", "test", "resources", "minifier-all", "target",
 				"elements.build.html");
-		final String expectedContent = Files.readAllLines(expectedPath).stream().collect(Collectors.joining("\n"));
+		final String expectedContent = Files.readAllLines(expectedContentPath).stream().collect(Collectors.joining("\n"));
+		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "target",
+				"index.build.html");
+		final String expectedIndex = Files.readAllLines(expectedIndexPath).stream().collect(Collectors.joining("\n"));
 
-		// input main imports
+		// input 
+		// main imports
 		final Path path = Paths.get("src", "test", "resources", "minifier-all", "source", "elements.html");
+		// main entry point for the imports above
+		final Path index = Paths.get("src", "test", "resources", "minifier-all", "source", "index.html");
 
 		// call
-		final String minimized = sut.minimize(path);
+		final MiniElements minimized = sut.minimize(index);
 
 		// asasertions
 		assertNotNull(minimized);
-		assertEquals( expectedContent, minimized );
+		assertEquals( expectedContent, minimized.getContent() );
+		assertEquals( expectedIndex, minimized.getIndexContent() );
+
+		//assertNotNull(minimized);
 		
 	}
 }

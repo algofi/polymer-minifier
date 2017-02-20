@@ -2,8 +2,10 @@ package fr.algofi.maven.plugins.polymer.minifier;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -19,16 +21,22 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
+import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class ElementsMinifier {
 
 	private PolymerMinifier minifier = new PolymerMinifier();
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
-
+	private Map<String, PolymerComponent> components;
+	private Document indexDocument;
+	private Path importPath;
+	private String importHref;
+	private String importHtml;
 
 	public ElementsMinifier() {
 		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
@@ -40,23 +48,97 @@ public class ElementsMinifier {
 		componentNameIterator = componentNames.iterator();
 	}
 
-	public String minimize(final Path path) throws IOException, MinifierException {
-		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
+	/**
+	 * minimize all elements. To replacement in entry point if present
+	 * 
+	 * @param path
+	 *            path to all elements
+	 * @param index
+	 *            main entry point. Optional
+	 * @return
+	 * @throws IOException
+	 * @throws MinifierException
+	 */
+	public MiniElements minimize(final Path index) throws IOException, MinifierException {
 
+		final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
+		final Path path = getImportPath(index, indexContent);
+
+		final String minifiedContent = minifyElements(path);
+		String miniIndex = changeImportLink(indexContent);
+		miniIndex = minifyDependencies(miniIndex);
+
+		final MiniElements minimized = new MiniElements();
+		minimized.setContent(minifiedContent);
+		minimized.setIndexContent(miniIndex);
+
+		return minimized;
+	}
+
+	private String minifyDependencies(String indexContent) {
+
+		for (PolymerComponent component : components.values()) {
+			final String tagName = component.getName();
+			// tag present ?
+			boolean isComponentPresent = tagName != null && tagName.trim().length() > 0
+					&& indexDocument.getElementsByTag(tagName).size() > 0;
+			if (isComponentPresent) {
+				indexContent = MinifierUtils.minifyDependency(indexContent, component);
+			}
+		}
+
+		return indexContent;
+	}
+
+	private String changeImportLink(String indexContent) {
+
+		final String buildHref = importHref.replaceFirst(".html", ".build.html");
+		//indexContent = indexContent.replaceFirst(importHtml.substring(1, importHtml.length() - 1), "link rel=\"import\" href=\"" + buildHref + "\"");
+		indexContent = indexContent.replaceFirst(importHtml, "<link rel=\"import\" href=\"" + buildHref + "\">");
+
+		return indexContent;
+	}
+
+	private String minifyElements(final Path path) throws IOException, MinifierException {
 		// component already appended
-		final Map<String, PolymerComponent> components = getAndOrderAllComponents(path);
-		
+		components = getAndOrderAllComponents(path);
+
 		// Dependencies that only create new element
-		final Collection<PolymerComponent> dependencyElements = components.values().stream().filter( c -> c.getName() != null ).collect(Collectors.toList()); 
-		
+		final Collection<PolymerComponent> dependencyElements = components.values().stream()
+				.filter(c -> c.getName() != null).collect(Collectors.toList());
+
 		// give to the minifier a collection of all dependencies
-		minifier.setDependencies( dependencyElements );
+		minifier.setDependencies(dependencyElements);
 
+		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
 		appendAllComponents(components, builder);
-
 		builder.append("</div></body></html>");
-
 		return builder.toString();
+	}
+
+	private Path getImportPath(final Path index, final String indexContent) throws MinifierException {
+
+		indexDocument = Jsoup.parse(indexContent);
+		final Elements links = indexDocument.getElementsByTag("link");
+
+		final List<Path> imports = new ArrayList<>();
+
+		for (Element link : links) {
+			final String rel = link.attr("rel");
+			if ("import".equals(rel)) {
+				importHref = link.attr("href").trim();
+				importHtml = link.outerHtml();
+				importPath = index.getParent().normalize().resolve(Paths.get(importHref)).normalize();
+				imports.add(importPath);
+			}
+		}
+
+		if (imports.isEmpty() || imports.size() > 1) {
+			throw new MinifierException("Only one Import tag is supported");
+		} else {
+			return imports.get(0);
+		}
+
 	}
 
 	private void appendAllComponents(final Map<String, PolymerComponent> components, final StringBuilder builder)
@@ -114,7 +196,4 @@ public class ElementsMinifier {
 
 	}
 
-	
 }
-
-
