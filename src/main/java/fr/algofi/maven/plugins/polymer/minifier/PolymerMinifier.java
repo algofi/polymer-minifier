@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
+import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
+
 public class PolymerMinifier {
 
 	private Collection<PolymerComponent> dependencies = new ArrayList<>();
@@ -26,6 +31,9 @@ public class PolymerMinifier {
 
 		// initial value
 		polymer.setMiniContent(polymer.getContent());
+		
+		// minify all blanks
+		polymer.setMiniContent(minifyBlanks(polymer.getMinifiedContent()));
 
 		final Map<String, String> minifiedProperties = new LinkedHashMap<>();
 
@@ -60,7 +68,7 @@ public class PolymerMinifier {
 		String content = polymer.getMinifiedContent();
 
 		content = minifyProperties(content, propertyName, miniPropertyName);
-		content = minifyBlanks(content);
+		//content = minifyBlanks(content);
 		content = minifyName(content, polymer.getName(), polymer.getMiniName());
 		content = minifyDependenciesName(content, dependencies);
 
