@@ -1,6 +1,5 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
-import static fr.algofi.maven.plugins.polymer.minifier.MinifierUtils.propertyToAttribute;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -12,6 +11,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
+import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class MinifierUtilsTest {
 
@@ -118,15 +120,15 @@ public class MinifierUtilsTest {
 
 	@Test
 	public void shouldConvertAPropertyToAnAttributeName() {
-		assertEquals("a", propertyToAttribute("a"));
-		assertEquals("sessionid", propertyToAttribute("sessionid"));
-		assertEquals("session-id", propertyToAttribute("sessionId"));
-		assertEquals("session-id", propertyToAttribute("SessionId"));
+		assertEquals("a", MinifierUtils.propertyToAttribute("a"));
+		assertEquals("sessionid", MinifierUtils.propertyToAttribute("sessionid"));
+		assertEquals("session-id", MinifierUtils.propertyToAttribute("sessionId"));
+		assertEquals("session-id", MinifierUtils.propertyToAttribute("SessionId"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowAnExceptionIfNameIsNull() {
-		propertyToAttribute(null);
+		MinifierUtils.propertyToAttribute(null);
 	}
 
 }
