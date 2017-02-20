@@ -11,6 +11,10 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
+
 public class PolymerMinifierTest {
 
 	private PolymerMinifier sut;
@@ -22,6 +26,7 @@ public class PolymerMinifierTest {
 
 	@Test
 	public void shouldNotChangeThePolymerWebComponentCodeIfNoPropertyGiven() throws IOException, MinifierException {
+		final String contentExpected = readContent("src/test/resources/minifier/x-no-properties_expected.html");
 		// input
 		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-no-properties.html");
 
@@ -30,7 +35,7 @@ public class PolymerMinifierTest {
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
-		assertEquals(polymer.getContent(), polymer.getMinifiedContent());
+		assertEquals(contentExpected, polymer.getMinifiedContent());
 		assertNotNull(polymer.getProperties());
 		assertEquals(0, polymer.getProperties().size());
 	}
