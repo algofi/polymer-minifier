@@ -4,8 +4,19 @@
 	<groupId>fr.algofi.maven.plugins</groupId>
 	<artifactId>polymer-minifier</artifactId>
 	<version>1.0.0</version>
-	<name>Minify Polymer Project</name>
+	<name>Minify Polymer</name>
+	<description>Plugin to minify a polymer plugin</description>
 	<packaging>maven-plugin</packaging>
+	<url>https://github.com/algofi/polymer-minimizer</url>
+
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 
 	<dependencies>
 		<dependency>
@@ -102,4 +113,22 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<developers>
+		<developer>
+			<email>cjechoux@algofi.fr</email>
+			<name>Corentin Jechoux</name>
+			<timezone>GMT+1</timezone>
+		</developer>
+	</developers>
+	
+	
+	
+	<organization>
+		<name>Algofi</name>
+		<url>www.algofi.fr</url>
+	</organization>
+	<scm>
+		<url>https://github.com/algofi/polymer-minimizer.git</url>
+	</scm>
 </project>
