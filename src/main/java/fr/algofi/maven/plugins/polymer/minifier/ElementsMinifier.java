@@ -26,6 +26,7 @@ import org.jsoup.select.Elements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
@@ -67,19 +68,19 @@ public class ElementsMinifier {
 		try {
 			final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
 			final Path path = getImportPath(index, indexContent);
-	
+
 			final String minifiedContent = minifyElements(path);
 			String miniIndex = changeImportLink(indexContent);
 			miniIndex = minifyDependencies(miniIndex);
-	
+
 			final MiniElements minimized = new MiniElements();
 			minimized.setContent(minifiedContent);
 			minimized.setIndexContent(miniIndex);
 			minimized.setImportBuildHref(buildHref);
-	
+
 			return minimized;
-		} catch( IOException e ) {
-			throw new MinifierException( "Cannot read input files", e); 
+		} catch (IOException e) {
+			throw new MinifierException("Cannot read input files", e);
 		}
 	}
 
@@ -101,13 +102,15 @@ public class ElementsMinifier {
 	private String changeImportLink(String indexContent) {
 
 		buildHref = importHref.replaceFirst(".html", ".build.html");
-		//indexContent = indexContent.replaceFirst(importHtml.substring(1, importHtml.length() - 1), "link rel=\"import\" href=\"" + buildHref + "\"");
+		// indexContent = indexContent.replaceFirst(importHtml.substring(1,
+		// importHtml.length() - 1), "link rel=\"import\" href=\"" + buildHref +
+		// "\"");
 		indexContent = indexContent.replaceFirst(importHtml, "<link rel=\"import\" href=\"" + buildHref + "\">");
 
 		return indexContent;
 	}
 
-	private String minifyElements(final Path path) throws IOException, MinifierException {
+	private String minifyElements(final Path path) throws MinifierException {
 		// component already appended
 		components = getAndOrderAllComponents(path);
 
@@ -162,24 +165,34 @@ public class ElementsMinifier {
 
 	}
 
-	private Map<String, PolymerComponent> getAndOrderAllComponents(final Path path) throws IOException {
-		final Map<String, PolymerComponent> components = new LinkedHashMap<>();
-		final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
+	private Map<String, PolymerComponent> getAndOrderAllComponents(final Path path) throws MinifierException {
+		try {
 
-		final Elements links = document.getElementsByTag("link");
-		for (Element link : links) {
-			final String rel = link.attr("rel");
-			if ("import".equals(rel)) {
-				final String href = link.attr("href");
-				final String importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize().toString();
-				LOGGER.debug("path = " + importPath);
-				final PolymerComponent component = parser.read(importPath);
-				appendComponent(component, components);
+			final Map<String, PolymerComponent> components = new LinkedHashMap<>();
+			final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
 
+			final Elements links = document.getElementsByTag("link");
+			for (Element link : links) {
+				final String rel = link.attr("rel");
+				if ("import".equals(rel)) {
+					final String href = link.attr("href");
+					final Path importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize();
+					LOGGER.debug("path = " + importPath);
+
+					try {
+						final PolymerComponent component = parser.read(importPath.toString());
+						appendComponent(component, components);
+					} catch (PolymerParserException e) {
+						throw new MinifierException("Cannot read a dependency" + importPath, e);
+					}
+
+				}
 			}
-		}
 
-		return components;
+			return components;
+		} catch (IOException e) {
+			throw new MinifierException("Cannot parse the web page " + path, e);
+		}
 	}
 
 	private void appendComponent(final PolymerComponent component, Map<String, PolymerComponent> components) {
@@ -202,6 +215,10 @@ public class ElementsMinifier {
 			components.put(component.getPath(), component);
 		}
 
+	}
+
+	public void setMinifyJavascript(boolean minifyJavascript) {
+		minifier.setMinifyJavascript(minifyJavascript);
 	}
 
 }

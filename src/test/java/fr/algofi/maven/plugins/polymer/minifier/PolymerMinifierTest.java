@@ -47,7 +47,7 @@ public class PolymerMinifierTest {
 		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-no-properties.html");
 		
 		// call
-		sut.minifyJavascript( true );
+		sut.setMinifyJavascript( true );
 		sut.minify(polymer);
 		
 		// assertions

@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 
 public class PolymerParsedTest {
 
@@ -27,7 +28,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAnEmptyListWhenPolymerElementHasNoProperties() throws IOException, ScriptException {
+	public void shouldReturnAnEmptyListWhenPolymerElementHasNoProperties() throws  ScriptException, PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-no-properties.html";
 		// call
@@ -39,7 +40,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAListWith1PropertyWhenPolymerElementHasOneProperty() throws IOException, ScriptException {
+	public void shouldReturnAListWith1PropertyWhenPolymerElementHasOneProperty() throws  ScriptException, PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-one-properties.html";
 		// call
@@ -55,7 +56,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAListWith5PropertyWhenPolymerElementHasFiveProperty() throws IOException, ScriptException {
+	public void shouldReturnAListWith5PropertyWhenPolymerElementHasFiveProperty() throws  ScriptException, PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-five-properties.html";
 		// call
@@ -74,7 +75,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAnSingleListOfImportsDependenciesWhenOnlyPolymerImport() throws IOException, ScriptException {
+	public void shouldReturnAnSingleListOfImportsDependenciesWhenOnlyPolymerImport() throws  ScriptException, PolymerParserException {
 		// input
 		final String path = "src/test/resources/minifier-all/source/x-premier.html";
 		// call
@@ -86,7 +87,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnTheGoodImportsDependenciesWhenSomeProvided() throws IOException, ScriptException {
+	public void shouldReturnTheGoodImportsDependenciesWhenSomeProvided() throws  ScriptException, PolymerParserException {
 		// input
 		final String path = "src/test/resources/minifier-all/source/x-main.html";
 		// call

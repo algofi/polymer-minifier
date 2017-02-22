@@ -143,7 +143,7 @@ public class PolymerMinifier {
 		this.dependencies = dependencies;
 	}
 
-	public void minifyJavascript(boolean minifyJavascript) {
+	public void setMinifyJavascript(boolean minifyJavascript) {
 		this.minifyJavascript = minifyJavascript;
 	}
 }

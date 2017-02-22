@@ -21,6 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
+import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
@@ -55,37 +56,44 @@ public class PolymerParser {
 		this.scriptEngine = scriptEngine;
 	}
 
-	public PolymerComponent read(final String path) throws IOException {
-
-		final Document document = Jsoup.parse(new File(path), Charset.defaultCharset().name());
-
-		final ScriptPart script = MinifierUtils.extractScript(document);
-
-		final PolymerComponent polymer = new PolymerComponent();
-		
-		String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
-		content = content.replaceAll("<link\\p{Blank}+rel=\"import\"[^>]+>", "");
-		polymer.setContent(content.trim());
+	public PolymerComponent read(final String path) throws PolymerParserException  {
 
 		try {
-			final List<PolymerProperty> properties = extractPolymerProperties(script.getScript());
-			polymer.setProperties(properties);
-			final String name = extractPolymerName(script.getScript());
-			polymer.setName(name);
-		} catch (ScriptException e) {
-			// exception ignored
-			LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
+			
+			final Document document = Jsoup.parse(new File(path), Charset.defaultCharset().name());
+			
+			final ScriptPart script = MinifierUtils.extractScript(document);
+			
+			final PolymerComponent polymer = new PolymerComponent();
+			
+			String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
+			content = content.replaceAll("<link\\p{Blank}+rel=\"import\"[^>]+>", "");
+			polymer.setContent(content.trim());
+			
+			try {
+				final List<PolymerProperty> properties = extractPolymerProperties(script.getScript());
+				polymer.setProperties(properties);
+				final String name = extractPolymerName(script.getScript());
+				polymer.setName(name);
+			} catch (ScriptException e) {
+				// exception ignored
+				LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
+			}
+			
+			final List<PolymerComponent> imports = extractImports(path, document);
+			
+			polymer.setPath(path);
+			polymer.setImports(imports);
+			
+			return polymer;
+			
+		} catch( IOException e ) {
+			throw new PolymerParserException("Cannot read the polymer component at " + path, e);
 		}
-
-		final List<PolymerComponent> imports = extractImports(path, document);
-
-		polymer.setPath(path);
-		polymer.setImports(imports);
-
-		return polymer;
+		
 	}
 
-	private List<PolymerComponent> extractImports(final String path, final Document document) throws IOException {
+	private List<PolymerComponent> extractImports(final String path, final Document document) throws PolymerParserException  {
 		final List<PolymerComponent> imports = new ArrayList<>();
 
 		final Elements links = document.getElementsByTag("link");

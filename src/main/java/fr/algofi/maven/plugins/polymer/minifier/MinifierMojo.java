@@ -24,11 +24,15 @@ public class MinifierMojo extends AbstractMojo {
 
 	@Parameter(name = "outputFolder", defaultValue = "target/polymer-minifier")
 	private String outputFolder;
+	
+	@Parameter(name="minifyJavascript", defaultValue = "true")
+	private boolean minifyJavascript;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		final ElementsMinifier minifier = new ElementsMinifier();
+		minifier.setMinifyJavascript( minifyJavascript );
 
 		final Path indexPath = Paths.get(index);
 
