@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,7 +30,7 @@ import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class ElementsMinifier {
-
+	private static final Logger LOGGER = LogManager.getLogger(ElementsMinifier.class);
 	private PolymerMinifier minifier = new PolymerMinifier();
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
@@ -166,7 +168,7 @@ public class ElementsMinifier {
 			if ("import".equals(rel)) {
 				final String href = link.attr("href");
 				final String importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize().toString();
-				System.out.println("path = " + importPath);
+				LOGGER.debug("path = " + importPath);
 				final PolymerComponent component = parser.read(importPath);
 				appendComponent(component, components);
 
@@ -189,7 +191,7 @@ public class ElementsMinifier {
 			if (component.getName() != null) {
 				if (componentNameIterator.hasNext()) {
 					component.setMiniName(componentNameIterator.next());
-					System.out.println(component.getName() + " -> " + component.getMiniName());
+					LOGGER.debug(component.getName() + " -> " + component.getMiniName());
 				}
 			}
 			// minify component name

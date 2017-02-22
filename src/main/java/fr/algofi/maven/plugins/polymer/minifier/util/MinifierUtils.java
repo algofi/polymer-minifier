@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.apache.logging.log4j.Logger;
 
 import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.Compiler;
@@ -21,6 +23,8 @@ import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 
 public class MinifierUtils {
+
+	private static final Logger LOGGER = LogManager.getLogger(MinifierUtils.class);
 
 	/**
 	 * extract the 1st script tag met
@@ -38,38 +42,6 @@ public class MinifierUtils {
 		scriptPart.setScript(script.html());
 
 		return scriptPart;
-
-		// int start = document.indexOf("<script>");
-		//
-		// if (start >= 0) {
-		// int end = document.indexOf("</script>", start);
-		// start = start + 8;
-		// if (end >= start) {
-		// final String script = document.substring(start, end).trim();
-		// scriptPart.setScript(script);
-		// scriptPart.setStart(start);
-		// scriptPart.setEnd(end);
-		// return scriptPart;
-		// } else {
-		// throw new IllegalArgumentException("No closing script tag found");
-		// }
-		// }
-		//
-		// // get the opening tag
-		// start = document.indexOf("<script ");
-		// // get the closing position
-		// start = document.indexOf(">", start + 8);
-		// int end = document.indexOf("</script>", start);
-		// if (end >= start) {
-		// final String script = document.substring(start + 1, end).trim();
-		// scriptPart.setScript(script);
-		// scriptPart.setStart(start);
-		// scriptPart.setEnd(end);
-		// return scriptPart;
-		// } else {
-		// throw new IllegalArgumentException("No closing script tag found");
-		// }
-
 	}
 
 	public static void minifyJavascript(final String path, final String script) {
@@ -84,7 +56,7 @@ public class MinifierUtils {
 
 		/* final Result result = */compiler.compile(externs, inputs, options);
 
-		System.out.println(compiler.toSource());
+		LOGGER.debug(compiler.toSource());
 	}
 
 	/**
@@ -169,24 +141,17 @@ public class MinifierUtils {
 	public static String minifyDependency(String content, PolymerComponent dependency) {
 		final String dependencyName = dependency.getName();
 		final String dependencyMiniName = dependency.getMiniName();
-		// replace HTML opening tags
-//		content = content.replaceAll("<" + dependencyName, "\\<" + dependencyMiniName);
-		// replace HTML closing tags
-//		content = content.replaceAll("</" + dependencyName + ">", "</" + dependencyMiniName + ">");
-		// we replace the tag name everywhere : 
-		// opening and closing HTML tags, style CSS selector, javasacript CSS selector,
+		// we replace the tag name everywhere :
+		// opening and closing HTML tags, style CSS selector, javasacript CSS
+		// selector,
 		// document.createElement, and so on
-		content = content.replaceAll( dependencyName , dependencyMiniName );
+		content = content.replaceAll(dependencyName, dependencyMiniName);
 		// replace custom element attributes
-
-		// final Pattern pattern = Pattern.compile("(<" + dependencyMiniName
-		// + "([a-z\\- ]+\\$?=['\"][^'\"]*['\"])*>.*</" + dependencyMiniName
-		// + ">)");
 
 		// replace all mini tags
 		final List<String> tags = findHtmlTags(dependencyMiniName, content);
-		
-		for ( String tag : tags ) {
+
+		for (String tag : tags) {
 			String miniTag = tag;
 			for (PolymerProperty property : dependency.getProperties()) {
 				miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
@@ -196,43 +161,6 @@ public class MinifierUtils {
 			miniTag = miniTag.replaceAll("\t+", "");
 			content = content.replace(tag, miniTag);
 		}
-		
-		
-		// replace tag into CSS selector
-		// in style sheet
-//		final List<String> styles = findHtmlTags("style", content);
-//		for( final String style : styles ) {
-//			String miniStyle = style;
-//			miniStyle = miniStyle.replaceAll(dependencyName, dependencyMiniName);
-//			content = content.replace(style, miniStyle);
-//		}
-		
-		// in query selector in JS
-//		final List<String> scripts = findHtmlTags("script", content);
-//		for( final String script : scripts ) {
-//			String miniScript= script;
-//			// TODO all string that contains the tag must be replaced
-//			content = content.replace(script, miniScript);
-//		}
-		
-//		final Pattern pattern = Pattern.compile("(<" + dependencyMiniName + ".*</" + dependencyMiniName + ">)",
-//				Pattern.DOTALL);
-//		final Matcher matcher = pattern.matcher(content);
-//		while (matcher.find()) {
-//			final String find = matcher.group(1);
-//			System.out.println("GROUP   = " + find);
-//
-//			String miniTag = find;
-//			for (PolymerProperty property : dependency.getProperties()) {
-//				miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
-//				miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
-//			}
-//
-//			content = content.replace(find, miniTag);
-//		}
-
-//		content = content.replaceAll("document.createElement(\\p{Blank}*['\"]" + dependencyName + "['\"]\\p{Blank}*)",
-//				"document.createElement(\\p{Blank}*['\"]" + dependencyMiniName + "['\"]\\p{Blank}*)");
 
 		return content;
 	}
@@ -248,15 +176,13 @@ public class MinifierUtils {
 
 		int start = 0;
 		int end = 0;
-		
-		while (  (start = content.indexOf("<" + tagName, end) ) != -1 && 
-				(end = content.indexOf("</" + tagName + ">", start) ) != -1
-				) {
+
+		while ((start = content.indexOf("<" + tagName, end)) != -1
+				&& (end = content.indexOf("</" + tagName + ">", start)) != -1) {
 			final String html = content.substring(start, end + tagName.length() + 3);
 			tags.add(html);
 		}
-		
-		
+
 		return tags;
 	}
 

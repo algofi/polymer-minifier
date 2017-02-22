@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -32,6 +34,9 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
  */
 public class PolymerParser {
 
+	private static final Logger LOGGER = LogManager.getLogger(PolymerParser.class);
+
+	
 	/**
 	 * script engine - to evaluate javascript
 	 */
@@ -69,7 +74,7 @@ public class PolymerParser {
 			polymer.setName(name);
 		} catch (ScriptException e) {
 			// exception ignored
-			System.out.println("[WARN] cannot parse the file : " + path + " . Cause : " + e.getMessage());
+			LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
 		}
 
 		final List<PolymerComponent> imports = extractImports(path, document);
