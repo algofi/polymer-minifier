@@ -1,10 +1,11 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
@@ -129,6 +130,27 @@ public class MinifierUtilsTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowAnExceptionIfNameIsNull() {
 		MinifierUtils.propertyToAttribute(null);
+	}
+
+	@Test
+	public void shouldFindMultiLineHtmlTag() throws IOException {
+		final String path = "src/test/resources/minifier/x-dep-properties.html";
+		final String content = Files.readAllLines(Paths.get(path)).stream()
+				.collect(Collectors.joining("\n"));
+		
+		// input tag : 
+		final String tagName = "x-five-properties";
+		
+		// call
+		final List<String> tags = MinifierUtils.findHtmlTags( tagName, content );
+		
+		assertNotNull( tags );
+		assertFalse( tags.isEmpty() );
+		assertEquals("<x-five-properties session-id=\"[[sessionId]]\"\n" 
+			+ "\t\t\tuser-id=\"[[userId]]\"\n" 
+			+ "\t\t\tposts=\"{{posts}}\">\n"
+			+ "\t\t\t\n"
+			+"\t\t\t</x-five-properties>", tags.iterator().next());
 	}
 
 }
