@@ -2,8 +2,15 @@
 <dom-module id="x-dep-properties">
 	<template>
 		<style>
+		x-five-properties {
+			border: 1px solid red;
+		}
 		</style>
-		<x-five-properties session-id="[[sessionId]]" user-id="[[userId]]" posts="{{posts}}"></x-five-properties>
+		<x-five-properties session-id="[[sessionId]]"
+			user-id="[[userId]]"
+			posts="{{posts}}">
+			
+			</x-five-properties>
 		<script>
 			Polymer( {
 				is:'x-dep-properties',
@@ -11,6 +18,13 @@
 					sessionId: Number,
 					userId: String,
 					posts: Array,
+				},
+				ready: function () {
+					var dep = document.createElement( 'x-five-properties' );
+					this.appendChild( dep );
+					this.querySelectorAll( 'x-five-properties ');
+					this.$$( 'x-five-properties ');
+					this.$$( 'x-five-properties + p');
 				}
 			} );
 			

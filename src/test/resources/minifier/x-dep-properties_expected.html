@@ -1,10 +1,21 @@
-<dom-module id="x-dep-properties"><template><style></style><x-a a="[[a]]" b="[[b]]" e="{{c}}"></x-a><script>
+<dom-module id="x-dep-properties"><template><style>
+		x-a {
+			border: 1px solid red;
+		}
+		</style><x-a a="[[a]]" b="[[b]]" e="{{c}}"></x-a><script>
 			Polymer( {
 				is:'x-dep-properties',
 				properties: {
 					a: Number,
 					b: String,
 					c: Array,
+				},
+				ready: function () {
+					var dep = document.createElement( 'x-a' );
+					this.appendChild( dep );
+					this.querySelectorAll( 'x-a ');
+					this.$$( 'x-a ');
+					this.$$( 'x-a + p');
 				}
 			} );
 			
