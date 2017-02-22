@@ -40,11 +40,15 @@ public class MinifierUtils {
 
 		final Element script = scripts.get(0);
 		scriptPart.setScript(script.html());
+		String bulkScript = script.outerHtml();
+		bulkScript = bulkScript.substring(bulkScript.indexOf(">")+1);
+		bulkScript =  bulkScript.replace("</script>", "");
+		scriptPart.setBulkScript(bulkScript);
 
 		return scriptPart;
 	}
 
-	public static void minifyJavascript(final String path, final String script) {
+	public static String minifyJavascript(final String path, final String script) {
 		final Compiler compiler = new Compiler();
 
 		final CompilerOptions options = new CompilerOptions();
@@ -52,12 +56,16 @@ public class MinifierUtils {
 
 		final List<SourceFile> externs = Collections.emptyList();
 		final List<SourceFile> inputs = new ArrayList<>();
-		inputs.add(SourceFile.fromFile(new File(path + ".js")));
+//		inputs.add(SourceFile.fromFile(new File(path + ".js")));
+		SourceFile src = SourceFile.fromCode(path, script);
+		inputs.add(src);
+		
 
 		/* final Result result = */compiler.compile(externs, inputs, options);
 
-		LOGGER.debug(compiler.toSource());
+		return compiler.toSource().trim();
 	}
+	
 
 	/**
 	 * convert a property name to an attribute
