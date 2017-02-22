@@ -170,34 +170,94 @@ public class MinifierUtils {
 		final String dependencyName = dependency.getName();
 		final String dependencyMiniName = dependency.getMiniName();
 		// replace HTML opening tags
-		content = content.replaceAll("<" + dependencyName, "\\<" + dependencyMiniName);
+//		content = content.replaceAll("<" + dependencyName, "\\<" + dependencyMiniName);
 		// replace HTML closing tags
-		content = content.replaceAll("</" + dependencyName + ">", "</" + dependencyMiniName + ">");
+//		content = content.replaceAll("</" + dependencyName + ">", "</" + dependencyMiniName + ">");
+		// we replace the tag name everywhere : 
+		// opening and closing HTML tags, style CSS selector, javasacript CSS selector,
+		// document.createElement, and so on
+		content = content.replaceAll( dependencyName , dependencyMiniName );
 		// replace custom element attributes
 
 		// final Pattern pattern = Pattern.compile("(<" + dependencyMiniName
 		// + "([a-z\\- ]+\\$?=['\"][^'\"]*['\"])*>.*</" + dependencyMiniName
 		// + ">)");
-		final Pattern pattern = Pattern
-				.compile("(<" + dependencyMiniName + ".*>[\n\\r.]*</" + dependencyMiniName + ">)");
-		final Matcher matcher = pattern.matcher(content);
-		while (matcher.find()) {
-			final String find = matcher.group(1);
-			System.out.println("GROUP   = " + find);
 
-			String miniTag = find;
+		// replace all mini tags
+		final List<String> tags = findHtmlTags(dependencyMiniName, content);
+		
+		for ( String tag : tags ) {
+			String miniTag = tag;
 			for (PolymerProperty property : dependency.getProperties()) {
 				miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
 				miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
 			}
-
-			content = content.replace(find, miniTag);
+			miniTag = miniTag.replaceAll("\\v+", " ");
+			miniTag = miniTag.replaceAll("\t+", "");
+			content = content.replace(tag, miniTag);
 		}
+		
+		
+		// replace tag into CSS selector
+		// in style sheet
+//		final List<String> styles = findHtmlTags("style", content);
+//		for( final String style : styles ) {
+//			String miniStyle = style;
+//			miniStyle = miniStyle.replaceAll(dependencyName, dependencyMiniName);
+//			content = content.replace(style, miniStyle);
+//		}
+		
+		// in query selector in JS
+//		final List<String> scripts = findHtmlTags("script", content);
+//		for( final String script : scripts ) {
+//			String miniScript= script;
+//			// TODO all string that contains the tag must be replaced
+//			content = content.replace(script, miniScript);
+//		}
+		
+//		final Pattern pattern = Pattern.compile("(<" + dependencyMiniName + ".*</" + dependencyMiniName + ">)",
+//				Pattern.DOTALL);
+//		final Matcher matcher = pattern.matcher(content);
+//		while (matcher.find()) {
+//			final String find = matcher.group(1);
+//			System.out.println("GROUP   = " + find);
+//
+//			String miniTag = find;
+//			for (PolymerProperty property : dependency.getProperties()) {
+//				miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
+//				miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
+//			}
+//
+//			content = content.replace(find, miniTag);
+//		}
 
-
-		content = content.replaceAll("document.createElement(\\p{Blank}*['\"]" + dependencyName + "['\"]\\p{Blank}*)", "document.createElement(\\p{Blank}*['\"]" + dependencyMiniName + "['\"]\\p{Blank}*)");
+//		content = content.replaceAll("document.createElement(\\p{Blank}*['\"]" + dependencyName + "['\"]\\p{Blank}*)",
+//				"document.createElement(\\p{Blank}*['\"]" + dependencyMiniName + "['\"]\\p{Blank}*)");
 
 		return content;
+	}
+
+	/**
+	 * find a list HTML code that involves the HTML tag
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public static List<String> findHtmlTags(final String tagName, final String content) {
+		final List<String> tags = new ArrayList<>();
+
+		int start = 0;
+		int end = 0;
+		
+		while (  (start = content.indexOf("<" + tagName, end) ) != -1 && 
+				(end = content.indexOf("</" + tagName + ">", start) ) != -1
+				) {
+			final String html = content.substring(start, end + tagName.length() + 3);
+			tags.add(html);
+		}
+		
+		
+		return tags;
 	}
 
 }
