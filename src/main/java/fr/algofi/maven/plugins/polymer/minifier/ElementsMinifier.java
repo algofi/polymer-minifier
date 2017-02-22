@@ -62,21 +62,25 @@ public class ElementsMinifier {
 	 * @throws IOException
 	 * @throws MinifierException
 	 */
-	public MiniElements minimize(final Path index) throws IOException, MinifierException {
+	public MiniElements minimize(final Path index) throws MinifierException {
 
-		final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
-		final Path path = getImportPath(index, indexContent);
-
-		final String minifiedContent = minifyElements(path);
-		String miniIndex = changeImportLink(indexContent);
-		miniIndex = minifyDependencies(miniIndex);
-
-		final MiniElements minimized = new MiniElements();
-		minimized.setContent(minifiedContent);
-		minimized.setIndexContent(miniIndex);
-		minimized.setImportBuildHref(buildHref);
-
-		return minimized;
+		try {
+			final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
+			final Path path = getImportPath(index, indexContent);
+	
+			final String minifiedContent = minifyElements(path);
+			String miniIndex = changeImportLink(indexContent);
+			miniIndex = minifyDependencies(miniIndex);
+	
+			final MiniElements minimized = new MiniElements();
+			minimized.setContent(minifiedContent);
+			minimized.setIndexContent(miniIndex);
+			minimized.setImportBuildHref(buildHref);
+	
+			return minimized;
+		} catch( IOException e ) {
+			throw new MinifierException( "Cannot read input files", e); 
+		}
 	}
 
 	private String minifyDependencies(String indexContent) {
