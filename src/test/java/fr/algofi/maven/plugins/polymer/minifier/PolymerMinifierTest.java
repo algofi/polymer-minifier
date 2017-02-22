@@ -41,6 +41,23 @@ public class PolymerMinifierTest {
 	}
 
 	@Test
+	public void shouldMinifyJavascript() throws IOException, MinifierException {
+		final String contentExpected = readContent("src/test/resources/minifier/x-no-properties_expected.min.html");
+		// input
+		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-no-properties.html");
+		
+		// call
+		sut.minifyJavascript( true );
+		sut.minify(polymer);
+		
+		// assertions
+		assertNotNull(polymer.getMinifiedContent());
+		assertEquals(contentExpected, polymer.getMinifiedContent());
+		assertNotNull(polymer.getProperties());
+		assertEquals(0, polymer.getProperties().size());
+	}
+
+	@Test
 	public void shouldMinifyOnePropertyThePolymerWebComponentCodeIfOnePropertyGiven()
 			throws IOException, MinifierException {
 		final String contentExpected = readContent("src/test/resources/minifier/x-one-properties_expected.html");
