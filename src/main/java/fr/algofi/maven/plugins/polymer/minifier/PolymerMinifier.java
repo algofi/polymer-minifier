@@ -9,15 +9,20 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
+import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class PolymerMinifier {
 
 	private Collection<PolymerComponent> dependencies = new ArrayList<>();
+	private boolean minifyJavascript;
 
 	/**
 	 * minify a polymer component
@@ -32,7 +37,7 @@ public class PolymerMinifier {
 
 		// initial value
 		polymer.setMiniContent(polymer.getContent());
-		
+
 		// minify all blanks
 		polymer.setMiniContent(minifyBlanks(polymer.getMinifiedContent()));
 
@@ -52,6 +57,18 @@ public class PolymerMinifier {
 			}
 		}
 
+		if (minifyJavascript) {
+			minifyJavascript(polymer);
+		}
+
+	}
+
+	private void minifyJavascript(PolymerComponent polymer) {
+		final Document document = Jsoup.parse(polymer.getMinifiedContent());
+		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
+		final String miniJavascript = MinifierUtils.minifyJavascript(polymer.getPath(), scriptPart.getBulkScript());
+		final String minifiedContent = polymer.getMinifiedContent().replace(scriptPart.getBulkScript(), miniJavascript);
+		polymer.setMiniContent(minifiedContent);
 	}
 
 	private String getNextMiniPropertyName(final Iterator<String> iterator) throws MinifierException {
@@ -69,7 +86,7 @@ public class PolymerMinifier {
 		String content = polymer.getMinifiedContent();
 
 		content = minifyProperties(content, propertyName, miniPropertyName);
-		//content = minifyBlanks(content);
+		// content = minifyBlanks(content);
 		content = MinifierUtils.minifyName(content, polymer.getName(), polymer.getMiniName());
 		content = minifyDependenciesName(content, dependencies);
 
@@ -85,10 +102,6 @@ public class PolymerMinifier {
 
 		return content;
 	}
-
-	
-
-	
 
 	private String minifyBlanks(String content) {
 		// remove empty lines
@@ -128,5 +141,9 @@ public class PolymerMinifier {
 
 	public void setDependencies(Collection<PolymerComponent> dependencies) {
 		this.dependencies = dependencies;
+	}
+
+	public void minifyJavascript(boolean minifyJavascript) {
+		this.minifyJavascript = minifyJavascript;
 	}
 }
