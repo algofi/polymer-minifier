@@ -17,6 +17,7 @@ public class ScriptPart {
 	 * end position of the script (exclusive)
 	 */
 	private int end;
+	private String bulkScript;
 
 	public void setScript(String script) {
 		this.script = script;
@@ -41,4 +42,13 @@ public class ScriptPart {
 	public int getEnd() {
 		return end;
 	}
+
+	public void setBulkScript(String bulkScript) {
+		this.bulkScript = bulkScript;
+	}
+
+	public String getBulkScript() {
+		return bulkScript;
+	}
+
 }
