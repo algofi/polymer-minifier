@@ -40,6 +40,8 @@ public class PolymerMinifier {
 
 		// minify all blanks
 		polymer.setMiniContent(minifyBlanks(polymer.getMinifiedContent()));
+		// remove HTML comments
+		polymer.setMiniContent(removeHTMLComments(polymer.getMinifiedContent()));
 
 		final Map<String, String> minifiedProperties = new LinkedHashMap<>();
 
@@ -61,6 +63,18 @@ public class PolymerMinifier {
 			minifyJavascript(polymer);
 		}
 
+	}
+
+	private String removeHTMLComments(String minifiedContent) {
+
+		final Pattern pattern = Pattern.compile("(<!--[^'].*[^']-->)", Pattern.DOTALL);
+		final Matcher matcher = pattern.matcher(minifiedContent);
+		while (matcher.find()) {
+			final String comment = matcher.group(1);
+			minifiedContent = minifiedContent.replace(comment, "");
+		}
+
+		return minifiedContent;
 	}
 
 	private void minifyJavascript(PolymerComponent polymer) {
