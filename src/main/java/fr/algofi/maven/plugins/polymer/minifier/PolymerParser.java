@@ -51,6 +51,7 @@ public class PolymerParser {
 
 	/**
 	 * constructor: create the JAVAScript
+	 * @param scriptEngine engine to parse Javascript
 	 */
 	public PolymerParser(final ScriptEngine scriptEngine) {
 		this.scriptEngine = scriptEngine;

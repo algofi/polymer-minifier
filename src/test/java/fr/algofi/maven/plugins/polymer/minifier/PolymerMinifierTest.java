@@ -11,6 +11,14 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.DependenciesMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
@@ -21,7 +29,12 @@ public class PolymerMinifierTest {
 
 	@Before
 	public void setup() {
-		sut = new PolymerMinifier();
+		final Minifier no = new NoMinifier();
+		final Minifier blank = new BlankMinifier();
+		final Minifier htmlComments = new HTMLCommentMinifier();
+		final Minifier properties = new PolymerPropertiesMinifier();
+		final Minifier polymerName = new PolymerNameMinifier();
+		sut = new PolymerMinifier(no, blank, htmlComments, properties, polymerName);
 	}
 
 	@Test
@@ -45,11 +58,11 @@ public class PolymerMinifierTest {
 		final String contentExpected = readContent("src/test/resources/minifier/x-no-properties_expected.min.html");
 		// input
 		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-no-properties.html");
-		
+
 		// call
-		sut.setMinifyJavascript( true );
+		sut.addMinifier(new JavascriptMinifier());
 		sut.minify(polymer);
-		
+
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
 		assertEquals(contentExpected, polymer.getMinifiedContent());
@@ -167,7 +180,8 @@ public class PolymerMinifierTest {
 		dep.setProperties(Arrays.asList(sessionIdDepProperty, userIdDepProperty, habilitationDepProperty,
 				friendsDepProperty, postsDepProperty));
 
-		sut.setDependencies(Arrays.asList(dep));
+		
+		sut.addMinifier(new DependenciesMinifier(Arrays.asList(dep)));
 
 		// call
 		sut.minify(polymer);

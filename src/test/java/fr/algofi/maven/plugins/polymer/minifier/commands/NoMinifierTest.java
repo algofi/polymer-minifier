@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 
 public class NoMinifierTest {
@@ -17,7 +18,7 @@ public class NoMinifierTest {
 	}
 
 	@Test
-	public void shouldNotMinimizeThePolymerContent() {
+	public void shouldNotMinimizeThePolymerContent() throws MinifierException {
 		// input
 		final PolymerComponent component = new PolymerComponent();
 		component.setContent("<p>Hello World</p>");

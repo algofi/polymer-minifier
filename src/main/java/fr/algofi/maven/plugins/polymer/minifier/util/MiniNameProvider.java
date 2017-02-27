@@ -19,7 +19,7 @@ public class MiniNameProvider {
 	/**
 	 * provide the list of string
 	 * 
-	 * @return
+	 * @return list of short names
 	 */
 	public List<String> provide() {
 
@@ -47,6 +47,13 @@ public class MiniNameProvider {
 		return shortName;
 	}
 
+	/**
+	 * generate a character from an int value
+	 * 
+	 * @param i
+	 *            initial int value
+	 * @return character wanted
+	 */
 	private Character generateCharacter(int i) {
 		final Character c = new Character((char) (INITIAL_VALUE + i));
 		return c;

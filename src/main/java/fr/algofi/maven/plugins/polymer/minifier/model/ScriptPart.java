@@ -9,14 +9,6 @@ package fr.algofi.maven.plugins.polymer.minifier.model;
 public class ScriptPart {
 
 	private String script;
-	/**
-	 * start position of the script (inclusive)
-	 */
-	private int start;
-	/**
-	 * end position of the script (exclusive)
-	 */
-	private int end;
 	private String bulkScript;
 
 	public void setScript(String script) {
@@ -25,22 +17,6 @@ public class ScriptPart {
 
 	public String getScript() {
 		return script;
-	}
-
-	public void setStart(int start) {
-		this.start = start;
-	}
-
-	public int getStart() {
-		return start;
-	}
-
-	public void setEnd(int end) {
-		this.end = end;
-	}
-
-	public int getEnd() {
-		return end;
 	}
 
 	public void setBulkScript(String bulkScript) {

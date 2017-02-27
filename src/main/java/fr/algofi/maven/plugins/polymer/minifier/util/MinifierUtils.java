@@ -1,36 +1,30 @@
 package fr.algofi.maven.plugins.polymer.minifier.util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.apache.logging.log4j.Logger;
 
 import com.google.javascript.jscomp.CompilationLevel;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.SourceFile;
 
-import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
-import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 
 public class MinifierUtils {
-
-	private static final Logger LOGGER = LogManager.getLogger(MinifierUtils.class);
 
 	/**
 	 * extract the 1st script tag met
 	 * 
 	 * @param document
-	 * @return
+	 *            HTML document to parse
+	 * @return script element
 	 */
 	public static ScriptPart extractScript(Document document) {
 
@@ -41,13 +35,22 @@ public class MinifierUtils {
 		final Element script = scripts.get(0);
 		scriptPart.setScript(script.html());
 		String bulkScript = script.outerHtml();
-		bulkScript = bulkScript.substring(bulkScript.indexOf(">")+1);
-		bulkScript =  bulkScript.replace("</script>", "");
+		bulkScript = bulkScript.substring(bulkScript.indexOf(">") + 1);
+		bulkScript = bulkScript.replace("</script>", "");
 		scriptPart.setBulkScript(bulkScript);
 
 		return scriptPart;
 	}
 
+	/**
+	 * Minimize javascript
+	 * 
+	 * @param path
+	 *            file path to minimize
+	 * @param script
+	 *            script content to minimize
+	 * @return the minimized script
+	 */
 	public static String minifyJavascript(final String path, final String script) {
 		final Compiler compiler = new Compiler();
 
@@ -56,22 +59,21 @@ public class MinifierUtils {
 
 		final List<SourceFile> externs = Collections.emptyList();
 		final List<SourceFile> inputs = new ArrayList<>();
-//		inputs.add(SourceFile.fromFile(new File(path + ".js")));
+		// inputs.add(SourceFile.fromFile(new File(path + ".js")));
 		SourceFile src = SourceFile.fromCode(path, script);
 		inputs.add(src);
-		
 
 		/* final Result result = */compiler.compile(externs, inputs, options);
 
 		return compiler.toSource().trim();
 	}
-	
 
 	/**
-	 * convert a property name to an attribute
+	 * convert a property name (ie sessionId) to an attribute (ie session-id)
 	 * 
 	 * @param name
-	 * @return
+	 *            property name
+	 * @return HTML attibute name
 	 */
 	public static String propertyToAttribute(String name) {
 
@@ -98,6 +100,15 @@ public class MinifierUtils {
 		return builder.toString();
 	}
 
+	/**
+	 * remove all content that match the given pattern
+	 * 
+	 * @param input
+	 *            text to read
+	 * @param pattern
+	 *            pattern that must be replaced with empty string
+	 * @return new content where pattern were replaced by empty string
+	 */
 	public static String removePattern(final String input, final Pattern pattern) {
 		final Matcher matcher = pattern.matcher(input);
 
@@ -128,56 +139,14 @@ public class MinifierUtils {
 		return builder.toString();
 	}
 
-	public static String minifyName(String content, String name, String miniName) {
-
-		if (miniName != null) {
-
-			// minify polymer component name
-
-			// 1) replace <dom-module > id attribute
-			content = content.replaceAll("<dom-module\\p{Blank}+id=\"" + name + "\"",
-					"<dom-module id=\"" + miniName + "\"");
-
-			// 2) minify javascript polymer component
-			content = content.replaceAll("is:\\p{Blank}+['\"]" + name + "['\"]", "is:'" + miniName + "'");
-
-		}
-
-		return content;
-	}
-
-	public static String minifyDependency(String content, PolymerComponent dependency) {
-		final String dependencyName = dependency.getName();
-		final String dependencyMiniName = dependency.getMiniName();
-		// we replace the tag name everywhere :
-		// opening and closing HTML tags, style CSS selector, javasacript CSS
-		// selector,
-		// document.createElement, and so on
-		content = content.replaceAll(dependencyName, dependencyMiniName);
-		// replace custom element attributes
-
-		// replace all mini tags
-		final List<String> tags = findHtmlTags(dependencyMiniName, content);
-
-		for (String tag : tags) {
-			String miniTag = tag;
-			for (PolymerProperty property : dependency.getProperties()) {
-				miniTag = miniTag.replace(property.getAttribute() + "=", property.getMiniAttribute() + "=");
-				miniTag = miniTag.replace(property.getAttribute() + "$=", property.getMiniAttribute() + "$=");
-			}
-			miniTag = miniTag.replaceAll("\\v+", " ");
-			miniTag = miniTag.replaceAll("\t+", "");
-			content = content.replace(tag, miniTag);
-		}
-
-		return content;
-	}
-
 	/**
 	 * find a list HTML code that involves the HTML tag
 	 * 
+	 * @param tagName
+	 *            name of the tag to find
 	 * @param content
-	 * @return
+	 *            HTML content to read
+	 * @return list of all tags content
 	 */
 	public static List<String> findHtmlTags(final String tagName, final String content) {
 		final List<String> tags = new ArrayList<>();

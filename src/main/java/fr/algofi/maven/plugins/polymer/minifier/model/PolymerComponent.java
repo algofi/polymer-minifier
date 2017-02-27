@@ -2,7 +2,6 @@ package fr.algofi.maven.plugins.polymer.minifier.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class PolymerComponent {
 
@@ -12,7 +11,6 @@ public class PolymerComponent {
 	private String miniContent;
 	
 	private List<PolymerProperty> properties = new ArrayList<>();
-//	private Map<String, String> minifiedProperties;
 	
 	private List<PolymerComponent> imports = new ArrayList<>();
 	private String miniName;
@@ -36,7 +34,7 @@ public class PolymerComponent {
 	/**
 	 * path of the polymer component
 	 * 
-	 * @param path
+	 * @param path path of the component
 	 */
 	public void setPath(String path) {
 		this.path = path;
@@ -45,7 +43,7 @@ public class PolymerComponent {
 	/**
 	 * set the content of the polymer element
 	 * 
-	 * @param content
+	 * @param content original content
 	 */
 	public void setContent(String content) {
 		this.content = content;
@@ -62,14 +60,6 @@ public class PolymerComponent {
 	public void setMiniContent(String miniContent) {
 		this.miniContent = miniContent;
 	}
-
-//	public Map<String, String> getMiniedProperties() {
-//		return minifiedProperties;
-//	}
-//
-//	public void setMinifiedProperties(Map<String, String> minifiedProperties) {
-//		this.minifiedProperties = minifiedProperties;
-//	}
 
 	public List<PolymerComponent> getImports() {
 		return imports;
