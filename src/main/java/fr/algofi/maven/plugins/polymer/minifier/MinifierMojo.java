@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -16,6 +18,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 
@@ -34,11 +42,22 @@ public class MinifierMojo extends AbstractMojo {
 	@Parameter(name = "gzipElements", defaultValue = "true")
 	private boolean gzipElements;
 
+	@Parameter(name = "minifyBlanks", defaultValue = "true")
+	private boolean minifyBlanks;
+	
+	@Parameter(name = "minifiyhtmlComments", defaultValue = "true")
+	private boolean minifiyHtmlComments;
+	
+	@Parameter(name = "minifyProperties", defaultValue = "false")
+	private boolean minifyProperties;
+	
+	@Parameter(name = "minifyPolymerName", defaultValue = "true")
+	private boolean minifyPolymerName;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
-		final ElementsMinifier minifier = new ElementsMinifier();
-		minifier.setMinifyJavascript(minifyJavascript);
+		final ElementsMinifier minifier = createElementsMinifier();
 
 		final Path indexPath = Paths.get(index);
 
@@ -46,10 +65,10 @@ public class MinifierMojo extends AbstractMojo {
 			final MiniElements mini = minifier.minimize(indexPath);
 
 			createTargetFolder();
-			
+
 			writeMini(Paths.get(outputFolder, "index.html"), mini.getIndexContent());
 			writeMini(Paths.get(outputFolder, mini.getImportBuildHref()), mini.getContent());
-			
+
 			if (gzipElements) {
 				writeMiniGzip(Paths.get(outputFolder, "index.html.gz"), mini.getIndexContent());
 				writeMiniGzip(Paths.get(outputFolder, mini.getImportBuildHref() + ".gz"), mini.getContent());
@@ -60,10 +79,37 @@ public class MinifierMojo extends AbstractMojo {
 		}
 	}
 
+	private ElementsMinifier createElementsMinifier() {
+		final Minifier no = new NoMinifier();
+
+		final List<Minifier> minifiers = new ArrayList<>();
+		if (minifyBlanks) {
+			minifiers.add(new BlankMinifier());
+		}
+		if (minifiyHtmlComments) {
+			minifiers.add(new HTMLCommentMinifier());
+		}
+		if (minifyProperties) {
+			minifiers.add(new PolymerPropertiesMinifier());
+		}
+		if (minifyPolymerName) {
+			minifiers.add(new PolymerNameMinifier());
+		}
+
+		final ElementsMinifier minifier = new ElementsMinifier(no, minifiers.toArray(new Minifier[minifiers.size()]));
+		if (minifyJavascript) {
+			minifier.setMinifyJavascript(minifyJavascript);
+		}
+		return minifier;
+	}
+
 	/**
 	 * write the content into a gzipped file
-	 * @param path path of the archive
-	 * @param content content to write
+	 * 
+	 * @param path
+	 *            path of the archive
+	 * @param content
+	 *            content to write
 	 * @throws IOException
 	 */
 	private void writeMiniGzip(Path path, String content) throws IOException {
@@ -83,6 +129,7 @@ public class MinifierMojo extends AbstractMojo {
 
 	/**
 	 * Write the content into an index file
+	 * 
 	 * @param path
 	 * @param indexContent
 	 * @throws FileNotFoundException

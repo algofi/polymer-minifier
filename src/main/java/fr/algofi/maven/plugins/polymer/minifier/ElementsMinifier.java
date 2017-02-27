@@ -24,14 +24,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.DependenciesMinifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
@@ -46,7 +41,7 @@ import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
  */
 public class ElementsMinifier {
 	private static final Logger LOGGER = LogManager.getLogger(ElementsMinifier.class);
-	private final PolymerMinifier minifier;
+	private final PolymerMinifier polymerMinifier;
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
 	private Map<String, PolymerComponent> components;
@@ -58,15 +53,9 @@ public class ElementsMinifier {
 
 	private Minifier javascriptMinifier = new JavascriptMinifier();
 
-	public ElementsMinifier() {
+	public ElementsMinifier(Minifier minifier, Minifier... minifiers) {
 
-		final Minifier no = new NoMinifier();
-		final Minifier blank = new BlankMinifier();
-		final Minifier htmlComments = new HTMLCommentMinifier();
-		final Minifier properties = new PolymerPropertiesMinifier();
-		final Minifier polymerName = new PolymerNameMinifier();
-
-		minifier = new PolymerMinifier(no, blank, htmlComments, properties, polymerName);
+		polymerMinifier = new PolymerMinifier(minifier, minifiers);
 
 		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		parser = new PolymerParser(scriptEngine);
@@ -174,7 +163,7 @@ public class ElementsMinifier {
 
 		// give to the minifier a collection of all dependencies
 		// minifier.addMinifier(dependencyElements);
-		minifier.addMinifier(new DependenciesMinifier(dependencyElements));
+		polymerMinifier.addMinifier(new DependenciesMinifier(dependencyElements));
 
 		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
 		appendAllComponents(components, builder);
@@ -234,7 +223,7 @@ public class ElementsMinifier {
 		for (String key : components.keySet()) {
 			final PolymerComponent component = components.get(key);
 
-			minifier.minify(component);
+			polymerMinifier.minify(component);
 
 			builder.append(component.getMinifiedContent());
 		}
@@ -319,9 +308,9 @@ public class ElementsMinifier {
 	 */
 	public void setMinifyJavascript(boolean minifyJavascript) {
 		if (minifyJavascript) {
-			minifier.addMinifier(javascriptMinifier);
+			polymerMinifier.addMinifier(javascriptMinifier);
 		} else {
-			minifier.removeMinifier(javascriptMinifier);
+			polymerMinifier.removeMinifier(javascriptMinifier);
 		}
 	}
 

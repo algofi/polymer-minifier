@@ -12,6 +12,12 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 
@@ -21,7 +27,13 @@ public class ElementsMinifierTest {
 
 	@Before
 	public void setup() {
-		sut = new ElementsMinifier();
+		final Minifier no = new NoMinifier();
+		final Minifier blank = new BlankMinifier();
+		final Minifier htmlComments = new HTMLCommentMinifier();
+		final Minifier properties = new PolymerPropertiesMinifier();
+		final Minifier polymerName = new PolymerNameMinifier();
+
+		sut = new ElementsMinifier(no, blank, htmlComments, properties, polymerName);
 	}
 
 	@Test
