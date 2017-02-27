@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -23,16 +24,29 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.DependenciesMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
-import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
+/**
+ * minify a set of web component
+ * 
+ * @author cjechoux
+ *
+ */
 public class ElementsMinifier {
 	private static final Logger LOGGER = LogManager.getLogger(ElementsMinifier.class);
-	private PolymerMinifier minifier = new PolymerMinifier();
+	private final PolymerMinifier minifier;
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
 	private Map<String, PolymerComponent> components;
@@ -42,7 +56,18 @@ public class ElementsMinifier {
 	private String buildHref;
 	private String importHtml;
 
+	private Minifier javascriptMinifier = new JavascriptMinifier();
+
 	public ElementsMinifier() {
+
+		final Minifier no = new NoMinifier();
+		final Minifier blank = new BlankMinifier();
+		final Minifier htmlComments = new HTMLCommentMinifier();
+		final Minifier properties = new PolymerPropertiesMinifier();
+		final Minifier polymerName = new PolymerNameMinifier();
+
+		minifier = new PolymerMinifier(no, blank, htmlComments, properties, polymerName);
+
 		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
 		parser = new PolymerParser(scriptEngine);
 
@@ -53,15 +78,13 @@ public class ElementsMinifier {
 	}
 
 	/**
-	 * minimize all elements. To replacement in entry point if present
+	 * minimize all elements found into all link@import of the entry point
 	 * 
-	 * @param path
-	 *            path to all elements
 	 * @param index
-	 *            main entry point. Optional
-	 * @return
-	 * @throws IOException
+	 *            main entry point
+	 * @return a summary of all minified elements
 	 * @throws MinifierException
+	 *             thrown if we cannot minify a web component
 	 */
 	public MiniElements minimize(final Path index) throws MinifierException {
 
@@ -84,7 +107,16 @@ public class ElementsMinifier {
 		}
 	}
 
-	private String minifyDependencies(String indexContent) {
+	/**
+	 * minify dependencies of the entry point
+	 * 
+	 * @param indexContent
+	 *            content of the entry point (index.html)
+	 * @return the single minified content having all dependencies concatenated.
+	 * @throws MinifierException
+	 *             thrown in case we cannot minimize
+	 */
+	private String minifyDependencies(String indexContent) throws MinifierException {
 
 		for (PolymerComponent component : components.values()) {
 			final String tagName = component.getName();
@@ -92,24 +124,46 @@ public class ElementsMinifier {
 			boolean isComponentPresent = tagName != null && tagName.trim().length() > 0
 					&& indexDocument.getElementsByTag(tagName).size() > 0;
 			if (isComponentPresent) {
-				indexContent = MinifierUtils.minifyDependency(indexContent, component);
+
+				Minifier dependencyMinifier = new DependenciesMinifier(Arrays.asList(component));
+
+				final PolymerComponent indexComponent = new PolymerComponent();
+				indexComponent.setContent(indexContent);
+				indexComponent.setMiniContent(indexContent);
+
+				dependencyMinifier.minimize(indexComponent);
+
+				indexContent = indexComponent.getMinifiedContent();
 			}
 		}
 
 		return indexContent;
 	}
 
+	/**
+	 * change the import link with the built import link
+	 * 
+	 * @param indexContent
+	 *            index content to change
+	 * @return changed index content
+	 */
 	private String changeImportLink(String indexContent) {
 
 		buildHref = importHref.replaceFirst(".html", ".build.html");
-		// indexContent = indexContent.replaceFirst(importHtml.substring(1,
-		// importHtml.length() - 1), "link rel=\"import\" href=\"" + buildHref +
-		// "\"");
 		indexContent = indexContent.replaceFirst(importHtml, "<link rel=\"import\" href=\"" + buildHref + "\">");
 
 		return indexContent;
 	}
 
+	/**
+	 * Minify all elements found in the import set
+	 * 
+	 * @param path
+	 *            path of the file that contains only imports
+	 * @return content of all concatenated web component minified
+	 * @throws MinifierException
+	 *             thrown in the case we cannot minify
+	 */
 	private String minifyElements(final Path path) throws MinifierException {
 		// component already appended
 		components = getAndOrderAllComponents(path);
@@ -119,7 +173,8 @@ public class ElementsMinifier {
 				.filter(c -> c.getName() != null).collect(Collectors.toList());
 
 		// give to the minifier a collection of all dependencies
-		minifier.setDependencies(dependencyElements);
+		// minifier.addMinifier(dependencyElements);
+		minifier.addMinifier(new DependenciesMinifier(dependencyElements));
 
 		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
 		appendAllComponents(components, builder);
@@ -127,6 +182,17 @@ public class ElementsMinifier {
 		return builder.toString();
 	}
 
+	/**
+	 * get the 1st import from the index content
+	 * 
+	 * @param index
+	 *            path of the index content
+	 * @param indexContent
+	 *            index file content
+	 * @return path of the 1st import
+	 * @throws MinifierException
+	 *             thrown in the case no import if found
+	 */
 	private Path getImportPath(final Path index, final String indexContent) throws MinifierException {
 
 		indexDocument = Jsoup.parse(indexContent);
@@ -152,6 +218,16 @@ public class ElementsMinifier {
 
 	}
 
+	/**
+	 * minify and append all minified content together
+	 * 
+	 * @param components
+	 *            web component to browse
+	 * @param builder
+	 *            string builder to concat all web component
+	 * @throws MinifierException
+	 *             thown in the case we cananot minify
+	 */
 	private void appendAllComponents(final Map<String, PolymerComponent> components, final StringBuilder builder)
 			throws MinifierException {
 
@@ -165,6 +241,17 @@ public class ElementsMinifier {
 
 	}
 
+	/**
+	 * get a map of all web components : key component path, value
+	 * PolymerComponent
+	 * 
+	 * @param path
+	 *            path of the file to read all imports
+	 * @return all polymer component parsed within a map
+	 * @throws MinifierException
+	 *             in the case we cannot read the given page or we cannot parse
+	 *             the polymer component
+	 */
 	private Map<String, PolymerComponent> getAndOrderAllComponents(final Path path) throws MinifierException {
 		try {
 
@@ -195,6 +282,14 @@ public class ElementsMinifier {
 		}
 	}
 
+	/**
+	 * concat all web components all together
+	 * 
+	 * @param component
+	 *            the current component
+	 * @param components
+	 *            component dependencies
+	 */
 	private void appendComponent(final PolymerComponent component, Map<String, PolymerComponent> components) {
 
 		// append import, and then the components itself
@@ -217,8 +312,17 @@ public class ElementsMinifier {
 
 	}
 
+	/**
+	 * enable JS minification
+	 * 
+	 * @param minifyJavascript true to minify JS
+	 */
 	public void setMinifyJavascript(boolean minifyJavascript) {
-		minifier.setMinifyJavascript(minifyJavascript);
+		if (minifyJavascript) {
+			minifier.addMinifier(javascriptMinifier);
+		} else {
+			minifier.removeMinifier(javascriptMinifier);
+		}
 	}
 
 }
