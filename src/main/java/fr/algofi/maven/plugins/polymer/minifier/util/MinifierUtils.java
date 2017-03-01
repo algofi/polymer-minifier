@@ -59,11 +59,10 @@ public class MinifierUtils {
 
 		final List<SourceFile> externs = Collections.emptyList();
 		final List<SourceFile> inputs = new ArrayList<>();
-		// inputs.add(SourceFile.fromFile(new File(path + ".js")));
 		SourceFile src = SourceFile.fromCode(path, script);
 		inputs.add(src);
 
-		/* final Result result = */compiler.compile(externs, inputs, options);
+		compiler.compile(externs, inputs, options);
 
 		return compiler.toSource().trim();
 	}
