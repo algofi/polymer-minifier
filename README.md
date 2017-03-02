@@ -1,12 +1,18 @@
+<a href="https://travis-ci.org/algofi/polymer-minimizer" title="Latest push build on default branch: " target="_polymer-minimizer-build-ci">
+            <img src="https://travis-ci.org/algofi/polymer-minimizer.svg?branch=master" alt="build:">
+          </a>
+
 This maven-plugin build a set of polymer elements into a single file and **minifying** each of them.
 
-The following rules are applied :
+### Minification rules
 
 * HTML blanks removal
 * polymer custom tag and properties minification
 * Javascript minification (version 2.x)
 
 ### Usage
+
+TODO maven configuration example
 
 
 ### Roadmap
