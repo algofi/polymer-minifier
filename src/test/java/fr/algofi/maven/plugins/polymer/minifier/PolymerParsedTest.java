@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
+import java.io.File;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -97,7 +97,7 @@ public class PolymerParsedTest {
 		assertEquals(3, polymer.getImports().size());
 
 		final PolymerComponent premier = polymer.getImports().get(1);
-		assertEquals("src/test/resources/minifier-all/source/x-premier.html".replace('/', '\\'), premier.getPath());
+		assertEquals("src/test/resources/minifier-all/source/x-premier.html".replace('/', File.separatorChar), premier.getPath());
 		assertNotNull(premier.getProperties());
 		assertEquals(1, premier.getProperties().size());
 		assertEquals("userId", premier.getProperties().get(0).getName());
@@ -105,7 +105,7 @@ public class PolymerParsedTest {
 		assertEquals(1, premier.getImports().size());
 
 		final PolymerComponent second = polymer.getImports().get(2);
-		assertEquals("src/test/resources/minifier-all/source/x-second.html".replace('/', '\\'), second.getPath());
+		assertEquals("src/test/resources/minifier-all/source/x-second.html".replace('/', File.separatorChar), second.getPath());
 		assertNotNull(second.getProperties());
 		assertEquals(1, second.getProperties().size());
 		assertEquals("friends", second.getProperties().get(0).getName());
