@@ -1,5 +1,7 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
+import java.util.Collection;
+
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 
 public class PolymerNameMinifier implements Minifier {
@@ -8,7 +10,7 @@ public class PolymerNameMinifier implements Minifier {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void minimize(final PolymerComponent component) {
+	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies) {
 		String content = component.getMinifiedContent();
 		
 		final String name = component.getName();

@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.DependenciesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
@@ -32,8 +33,9 @@ public class ElementsMinifierTest {
 		final Minifier htmlComments = new HTMLCommentMinifier();
 		final Minifier properties = new PolymerPropertiesMinifier();
 		final Minifier polymerName = new PolymerNameMinifier();
+		final Minifier dep = new DependenciesMinifier();
 
-		sut = new ElementsMinifier(no, blank, htmlComments, properties, polymerName);
+		sut = new ElementsMinifier(no, blank, htmlComments, properties, polymerName, dep);
 	}
 
 	@Test

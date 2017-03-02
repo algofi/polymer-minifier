@@ -1,5 +1,6 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,14 +25,16 @@ public class PolymerPropertiesMinifier implements Minifier {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void minimize(final PolymerComponent component) throws MinifierException {
+	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies) throws MinifierException {
 		String content = component.getMinifiedContent();
 
 		final List<String> shortNames = new MiniNameProvider().provide();
 		final Iterator<String> shortNameIterator = shortNames.iterator();
 
 		if (!component.getProperties().isEmpty()) {
-			for (final PolymerProperty property : component.getProperties()) {
+			
+			// minify all property one by one
+			for (final PolymerProperty property : component.getProperties().values()) {
 
 				final String propertyName = property.getName();
 				final String miniPropertyName = getNextMiniPropertyName(shortNameIterator);

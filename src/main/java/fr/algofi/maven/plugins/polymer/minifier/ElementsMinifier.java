@@ -51,6 +51,8 @@ public class ElementsMinifier {
 	private String buildHref;
 	private String importHtml;
 
+	private Minifier dependenciesMinifier;
+
 	private Minifier javascriptMinifier = new JavascriptMinifier();
 
 	public ElementsMinifier(Minifier minifier, Minifier... minifiers) {
@@ -64,6 +66,21 @@ public class ElementsMinifier {
 		final List<String> componentNames = provider.provide().stream()
 				.collect(Collectors.mapping(name -> "x-" + name, Collectors.toList()));
 		componentNameIterator = componentNames.iterator();
+
+		setDependenciesMinifier(minifier, minifiers);
+
+	}
+
+	private void setDependenciesMinifier(Minifier minifier, Minifier... minifiers) {
+		if (minifier instanceof DependenciesMinifier) {
+			dependenciesMinifier = minifier;
+		}
+		for (Minifier mini : minifiers) {
+			if (mini instanceof DependenciesMinifier) {
+				dependenciesMinifier = mini;
+				break;
+			}
+		}
 	}
 
 	/**
@@ -83,7 +100,7 @@ public class ElementsMinifier {
 
 			final String minifiedContent = minifyElements(path);
 			String miniIndex = changeImportLink(indexContent);
-			miniIndex = minifyDependencies(miniIndex);
+			miniIndex = minifyIndexEntryPointDependencies(miniIndex);
 
 			final MiniElements minimized = new MiniElements();
 			minimized.setContent(minifiedContent);
@@ -105,27 +122,30 @@ public class ElementsMinifier {
 	 * @throws MinifierException
 	 *             thrown in case we cannot minimize
 	 */
-	private String minifyDependencies(String indexContent) throws MinifierException {
+	private String minifyIndexEntryPointDependencies(String indexContent) throws MinifierException {
 
-		for (PolymerComponent component : components.values()) {
-			final String tagName = component.getName();
-			// tag present ?
-			boolean isComponentPresent = tagName != null && tagName.trim().length() > 0
-					&& indexDocument.getElementsByTag(tagName).size() > 0;
-			if (isComponentPresent) {
+		if (dependenciesMinifier != null) {
+			for (PolymerComponent component : components.values()) {
+				final String tagName = component.getName();
+				// tag present ?
+				boolean isComponentPresent = tagName != null && tagName.trim().length() > 0
+						&& indexDocument.getElementsByTag(tagName).size() > 0;
+				if (isComponentPresent) {
 
-				Minifier dependencyMinifier = new DependenciesMinifier(Arrays.asList(component));
+					final PolymerComponent indexComponent = new PolymerComponent();
+					indexComponent.setContent(indexContent);
+					indexComponent.setMiniContent(indexContent);
 
-				final PolymerComponent indexComponent = new PolymerComponent();
-				indexComponent.setContent(indexContent);
-				indexComponent.setMiniContent(indexContent);
+					Collection<PolymerComponent> dependencies = Arrays.asList(component);
+					dependenciesMinifier.minimize(indexComponent, dependencies);
 
-				dependencyMinifier.minimize(indexComponent);
-
-				indexContent = indexComponent.getMinifiedContent();
+					indexContent = indexComponent.getMinifiedContent();
+				}
 			}
-		}
 
+		} else {
+			LOGGER.warn("Cannot minify dependency for index entry point: dependency minifier null.");
+		}
 		return indexContent;
 	}
 
@@ -157,13 +177,10 @@ public class ElementsMinifier {
 		// component already appended
 		components = getAndOrderAllComponents(path);
 
-		// Dependencies that only create new element
-		final Collection<PolymerComponent> dependencyElements = components.values().stream()
-				.filter(c -> c.getName() != null).collect(Collectors.toList());
-
 		// give to the minifier a collection of all dependencies
 		// minifier.addMinifier(dependencyElements);
-		polymerMinifier.addMinifier(new DependenciesMinifier(dependencyElements));
+		// polymerMinifier.addMinifier(new
+		// DependenciesMinifier(dependencyElements));
 
 		final StringBuilder builder = new StringBuilder("<html><head></head><body><div hidden=\"\">\n");
 		appendAllComponents(components, builder);
@@ -220,10 +237,14 @@ public class ElementsMinifier {
 	private void appendAllComponents(final Map<String, PolymerComponent> components, final StringBuilder builder)
 			throws MinifierException {
 
+		// Dependencies that only create new element
+		final Collection<PolymerComponent> dependencyElements = components.values().stream()
+				.filter(c -> c.getName() != null).collect(Collectors.toList());
+
 		for (String key : components.keySet()) {
 			final PolymerComponent component = components.get(key);
 
-			polymerMinifier.minify(component);
+			polymerMinifier.minify(component, dependencyElements);
 
 			builder.append(component.getMinifiedContent());
 		}
@@ -304,7 +325,8 @@ public class ElementsMinifier {
 	/**
 	 * enable JS minification
 	 * 
-	 * @param minifyJavascript true to minify JS
+	 * @param minifyJavascript
+	 *            true to minify JS
 	 */
 	public void setMinifyJavascript(boolean minifyJavascript) {
 		if (minifyJavascript) {

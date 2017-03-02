@@ -1,4 +1,4 @@
-package fr.algofi.maven.plugins.polymer.minifier;
+package fr.algofi.maven.plugins.polymer.minifier.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,25 +7,15 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.google.javascript.jscomp.CompilationLevel;
-import com.google.javascript.jscomp.Compiler;
-import com.google.javascript.jscomp.CompilerOptions;
-import com.google.javascript.jscomp.SourceFile;
-import com.google.javascript.rhino.Node;
-
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
-import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 public class MinifierUtilsTest {
 
@@ -101,7 +91,7 @@ public class MinifierUtilsTest {
 		final String content = "<script type='text/javascript'>\n\n\r\nconsole.log( 'hello world' );";
 		final Document document = Jsoup.parse(content);
 		// call
-		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
+		MinifierUtils.extractScript(document);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -111,7 +101,7 @@ public class MinifierUtilsTest {
 		final String content = "<script>\n\n\r\nconsole.log( 'hello world' );";
 		final Document document = Jsoup.parse(content);
 		// call
-		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
+		MinifierUtils.extractScript(document);
 	}
 
 	@Test

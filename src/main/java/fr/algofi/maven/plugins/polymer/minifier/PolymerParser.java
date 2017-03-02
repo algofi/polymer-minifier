@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
@@ -37,7 +39,6 @@ public class PolymerParser {
 
 	private static final Logger LOGGER = LogManager.getLogger(PolymerParser.class);
 
-	
 	/**
 	 * script engine - to evaluate javascript
 	 */
@@ -51,28 +52,30 @@ public class PolymerParser {
 
 	/**
 	 * constructor: create the JAVAScript
-	 * @param scriptEngine engine to parse Javascript
+	 * 
+	 * @param scriptEngine
+	 *            engine to parse Javascript
 	 */
 	public PolymerParser(final ScriptEngine scriptEngine) {
 		this.scriptEngine = scriptEngine;
 	}
 
-	public PolymerComponent read(final String path) throws PolymerParserException  {
+	public PolymerComponent read(final String path) throws PolymerParserException {
 
 		try {
-			
+
 			final Document document = Jsoup.parse(new File(path), Charset.defaultCharset().name());
-			
+
 			final ScriptPart script = MinifierUtils.extractScript(document);
-			
+
 			final PolymerComponent polymer = new PolymerComponent();
-			
+
 			String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
 			content = content.replaceAll("<link\\p{Blank}+rel=\"import\"[^>]+>", "");
 			polymer.setContent(content.trim());
-			
+
 			try {
-				final List<PolymerProperty> properties = extractPolymerProperties(script.getScript());
+				final Map<String, PolymerProperty> properties = extractPolymerProperties(script.getScript());
 				polymer.setProperties(properties);
 				final String name = extractPolymerName(script.getScript());
 				polymer.setName(name);
@@ -80,21 +83,22 @@ public class PolymerParser {
 				// exception ignored
 				LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
 			}
-			
+
 			final List<PolymerComponent> imports = extractImports(path, document);
-			
+
 			polymer.setPath(path);
 			polymer.setImports(imports);
-			
+
 			return polymer;
-			
-		} catch( IOException e ) {
+
+		} catch (IOException e) {
 			throw new PolymerParserException("Cannot read the polymer component at " + path, e);
 		}
-		
+
 	}
 
-	private List<PolymerComponent> extractImports(final String path, final Document document) throws PolymerParserException  {
+	private List<PolymerComponent> extractImports(final String path, final Document document)
+			throws PolymerParserException {
 		final List<PolymerComponent> imports = new ArrayList<>();
 
 		final Elements links = document.getElementsByTag("link");
@@ -118,20 +122,20 @@ public class PolymerParser {
 		return (String) scriptEngine.eval(COMPONENT_NAME_SCRIPT_PROLOGUE + script);
 	}
 
-	private List<PolymerProperty> extractPolymerProperties(String script) throws ScriptException {
-		final List<PolymerProperty> properties = new ArrayList<>();
+	private Map<String, PolymerProperty> extractPolymerProperties(String script) throws ScriptException {
+		final Map<String, PolymerProperty> properties = new HashMap<>();
 
 		final ScriptObjectMirror mirror = (ScriptObjectMirror) scriptEngine.eval(PROPERTIES_SCRIPT_PROLOGUE + script);
 		if (mirror != null) {
 			final String[] propertiesName = mirror.getOwnKeys(true);
 			final List<String> propertiesFound = Arrays.asList(propertiesName);
-			
-			for( final String propertyName : propertiesFound ) {
+
+			for (final String propertyName : propertiesFound) {
 				final PolymerProperty property = new PolymerProperty();
-				property.setName( propertyName );
-				properties.add(property);
+				property.setName(propertyName);
+				properties.put(propertyName, property);
 			}
-			
+
 		}
 
 		return properties;

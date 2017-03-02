@@ -1,5 +1,6 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +12,7 @@ public class HTMLCommentMinifier implements Minifier {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void minimize(final PolymerComponent component) {
+	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies) {
 		String minifiedContent = component.getMinifiedContent();
 		
 		final Pattern pattern = Pattern.compile("(<!--[^'].*[^']-->)", Pattern.DOTALL);

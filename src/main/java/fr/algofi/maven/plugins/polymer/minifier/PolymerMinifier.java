@@ -2,6 +2,7 @@ package fr.algofi.maven.plugins.polymer.minifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
@@ -27,10 +28,10 @@ public class PolymerMinifier {
 	 * @param polymer component to minify
 	 * @throws MinifierException thrown if we cannot minify a component
 	 */
-	public void minify(final PolymerComponent polymer) throws MinifierException {
+	public void minify(final PolymerComponent polymer, final Collection<PolymerComponent> dependencies) throws MinifierException {
 
 		for (Minifier minifier : minifiers) {
-			minifier.minimize(polymer);
+			minifier.minimize(polymer, dependencies);
 		}
 
 	}

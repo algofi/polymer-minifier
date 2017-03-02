@@ -24,7 +24,7 @@ public class NoMinifierTest {
 		component.setContent("<p>Hello World</p>");
 
 		// call
-		sut.minimize(component);
+		sut.minimize(component, null);
 
 		// assertions
 		assertEquals("<p>Hello World</p>", component.getMinifiedContent());

@@ -7,6 +7,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +47,7 @@ public class PolymerMinifierTest {
 		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-no-properties.html");
 
 		// call
-		sut.minify(polymer);
+		sut.minify(polymer, null);
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
@@ -61,7 +64,7 @@ public class PolymerMinifierTest {
 
 		// call
 		sut.addMinifier(new JavascriptMinifier());
-		sut.minify(polymer);
+		sut.minify(polymer, null);
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
@@ -79,17 +82,19 @@ public class PolymerMinifierTest {
 		final PolymerComponent polymer = readComponent("src/test/resources/minifier/x-one-properties.html");
 		final PolymerProperty sessionIdProperty = new PolymerProperty();
 		sessionIdProperty.setName("sessionId");
-		polymer.setProperties(Arrays.asList(sessionIdProperty));
+		final Map<String, PolymerProperty> properties = new HashMap<>();
+		properties.put(sessionIdProperty.getName(), sessionIdProperty);
+		polymer.setProperties(properties);
 
 		// call
-		sut.minify(polymer);
+		sut.minify(polymer, null);
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
 		assertEquals(contentExpected, polymer.getMinifiedContent());
 		assertNotNull(polymer.getProperties());
 		assertEquals(1, polymer.getProperties().size());
-		assertEquals("a", polymer.getProperties().get(0).getMiniName());
+		assertEquals("a", polymer.getProperties().get("sessionId").getMiniName());
 	}
 
 	@Test
@@ -115,11 +120,16 @@ public class PolymerMinifierTest {
 		final PolymerProperty postsProperty = new PolymerProperty();
 		postsProperty.setName("posts");
 
-		polymer.setProperties(
-				Arrays.asList(sessionIdProperty, userIdProperty, habilitationProperty, friendsProperty, postsProperty));
+		final Map<String, PolymerProperty> properties = new LinkedHashMap<>();
+		properties.put(sessionIdProperty.getName(), sessionIdProperty);
+		properties.put(userIdProperty.getName(), userIdProperty);
+		properties.put(habilitationProperty.getName(), habilitationProperty);
+		properties.put(friendsProperty.getName(), friendsProperty);
+		properties.put(postsProperty.getName(), postsProperty);
+		polymer.setProperties(properties);
 
 		// call
-		sut.minify(polymer);
+		sut.minify(polymer, null);
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());
@@ -127,11 +137,11 @@ public class PolymerMinifierTest {
 		// assert minifed properties
 		assertNotNull(polymer.getProperties());
 		assertEquals(5, polymer.getProperties().size());
-		assertEquals("a", polymer.getProperties().get(0).getMiniName());
-		assertEquals("b", polymer.getProperties().get(1).getMiniName());
-		assertEquals("c", polymer.getProperties().get(2).getMiniName());
-		assertEquals("d", polymer.getProperties().get(3).getMiniName());
-		assertEquals("e", polymer.getProperties().get(4).getMiniName());
+		assertEquals("a", polymer.getProperties().get("sessionId").getMiniName());
+		assertEquals("b", polymer.getProperties().get("userId").getMiniName());
+		assertEquals("c", polymer.getProperties().get("habilitation").getMiniName());
+		assertEquals("d", polymer.getProperties().get("friends").getMiniName());
+		assertEquals("e", polymer.getProperties().get("posts").getMiniName());
 	}
 
 	@Test
@@ -151,7 +161,11 @@ public class PolymerMinifierTest {
 		final PolymerProperty postsProperty = new PolymerProperty();
 		postsProperty.setName("posts");
 
-		polymer.setProperties(Arrays.asList(sessionIdProperty, userIdProperty, postsProperty));
+		final Map<String, PolymerProperty> properties = new HashMap<>();
+		properties.put(sessionIdProperty.getName(), sessionIdProperty);
+		properties.put(userIdProperty.getName(), userIdProperty);
+		properties.put(postsProperty.getName(), postsProperty);
+		polymer.setProperties(properties);
 
 		// dependency
 		PolymerComponent dep = new PolymerComponent();
@@ -177,14 +191,18 @@ public class PolymerMinifierTest {
 		postsDepProperty.setName("posts");
 		postsDepProperty.setMiniName("e");
 
-		dep.setProperties(Arrays.asList(sessionIdDepProperty, userIdDepProperty, habilitationDepProperty,
-				friendsDepProperty, postsDepProperty));
+		final Map<String, PolymerProperty> depProperties = new HashMap<>();
+		depProperties.put(sessionIdDepProperty.getName(), sessionIdDepProperty);
+		depProperties.put(userIdDepProperty.getName(), userIdDepProperty);
+		depProperties.put(habilitationDepProperty.getName(), habilitationDepProperty);
+		depProperties.put(friendsDepProperty.getName(), friendsDepProperty);
+		depProperties.put(postsDepProperty.getName(), postsDepProperty);
+		dep.setProperties(depProperties);
 
-		
-		sut.addMinifier(new DependenciesMinifier(Arrays.asList(dep)));
+		sut.addMinifier(new DependenciesMinifier());
 
 		// call
-		sut.minify(polymer);
+		sut.minify(polymer, Arrays.asList(dep));
 
 		// assertions
 		assertNotNull(polymer.getMinifiedContent());

@@ -1,5 +1,7 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
+import java.util.Collection;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -13,7 +15,7 @@ public class JavascriptMinifier implements Minifier {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void minimize(final PolymerComponent component) {
+	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies) {
 		
 		final Document document = Jsoup.parse(component.getMinifiedContent());
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);

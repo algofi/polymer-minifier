@@ -1,5 +1,7 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
+import java.util.Collection;
+
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 
@@ -17,9 +19,12 @@ public interface Minifier {
 	 * 
 	 * @param component
 	 *            web component to minify.
+	 * @param dependencies
+	 *            all other web component including itself
 	 * @throws MinifierException
 	 *             thrown if the minify operation failed
 	 */
-	public void minimize(PolymerComponent component) throws MinifierException;
+	public void minimize(PolymerComponent component, Collection<PolymerComponent> dependencies)
+			throws MinifierException;
 
 }
