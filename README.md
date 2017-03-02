@@ -1,3 +1,7 @@
+<a href="https://travis-ci.org/algofi/polymer-minimizer" title="Latest push build on default branch: " target="_polymer-minimizer-build-ci">
+            <img src="https://travis-ci.org/algofi/polymer-minimizer.svg?branch=master" alt="build:">
+          </a>
+
 This is a maven plugin to build into a single file all dependencies (imports) of a polymer projects.
 
 
