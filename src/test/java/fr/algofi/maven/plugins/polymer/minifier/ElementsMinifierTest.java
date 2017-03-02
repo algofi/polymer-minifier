@@ -42,11 +42,11 @@ public class ElementsMinifierTest {
 	public void shouldReturnAListOfImports() throws IOException, MinifierException {
 
 		// expected content :
-		final Path expectedContentPath = Paths.get("src", "test", "resources", "minifier-all", "target",
+		final Path expectedContentPath = Paths.get("src", "test", "resources", "minifier-all", "build",
 				"elements.build.html");
 		final String expectedContent = Files.readAllLines(expectedContentPath).stream()
 				.collect(Collectors.joining("\n"));
-		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "target",
+		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "build",
 				"index.build.html");
 		final String expectedIndex = Files.readAllLines(expectedIndexPath).stream().collect(Collectors.joining("\n"));
 

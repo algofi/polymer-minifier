@@ -1,0 +1,55 @@
+<html><head></head><body><div hidden="" >
+<dom-module id="x-a">
+	<template>
+	Hello [[a]] !!
+	</template>
+	<script>
+		Polymer( {
+			is: 'x-a',
+			properties: {
+				a: String,
+			}
+		} );
+	</script>
+</dom-module>
+<dom-module id="x-b">
+	<template>
+	<p>Posts:</p>
+	<ul>
+		<template is="dom-repeat" items="[[a]]">
+			<li>{{item.name}}</li>
+		</template>
+	</ul>
+	</template>
+	<script>
+		Polymer( {
+			is: 'x-b',
+			properties: {
+				a: Array,
+			}
+		} );
+	</script>
+</dom-module>
+<dom-module id="x-main">
+	<template>
+		<x-a a="{{a}}"></x-a>
+		<x-b a="[[b]]"></x-b>
+	</template>
+	<script>
+		Polymer( {
+			is: 'x-main',
+			properties: {
+				a: String,
+				b: {
+					type: Array,
+					value: [
+					    { name: 'Alice'},
+					    { name: 'Bob'},
+					    { name: 'Charles'},
+					]
+				}
+			}
+		} );
+	</script>
+</dom-module>
+</div></body></html>
