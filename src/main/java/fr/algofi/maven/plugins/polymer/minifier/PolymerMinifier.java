@@ -26,6 +26,7 @@ public class PolymerMinifier {
 	 * minify a polymer component
 	 * 
 	 * @param polymer component to minify
+	 * @param dependencies dependencies for this component
 	 * @throws MinifierException thrown if we cannot minify a component
 	 */
 	public void minify(final PolymerComponent polymer, final Collection<PolymerComponent> dependencies) throws MinifierException {

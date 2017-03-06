@@ -8,4 +8,8 @@ public class PolymerParserException extends Exception {
 		super(message, cause);
 	}
 
+	public PolymerParserException(String message) {
+		super(message);
+	}
+
 }

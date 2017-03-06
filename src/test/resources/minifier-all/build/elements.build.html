@@ -1,5 +1,5 @@
 <html><head></head><body><div hidden="">
-<script>(function () {
+<!--src\test\resources\minifier-all\source\bower_components\polymer\polymer-micro.html--><script>(function () {
 function resolve() {
 document.body.removeAttribute('unresolved');
 }
@@ -705,7 +705,7 @@ _initFeatures: function () {
 this._marshalHostAttributes();
 this._marshalBehaviors();
 }
-});</script><script>Polymer.Base._addFeature({
+});</script><!--src\test\resources\minifier-all\source\bower_components\polymer\polymer-mini.html--><script>Polymer.Base._addFeature({
 _prepTemplate: function () {
 if (this._template === undefined) {
 this._template = Polymer.DomModule.import(this.is, 'template');
@@ -2842,7 +2842,7 @@ this._tryReady();
 },
 _marshalBehavior: function (b) {
 }
-});</script><script>Polymer.nar = [];
+});</script><!--src\test\resources\minifier-all\source\bower_components\polymer\polymer.html--><script>Polymer.nar = [];
 Polymer.Annotations = {
 parseAnnotations: function (template) {
 var list = [];
@@ -8204,7 +8204,7 @@ this._children = Polymer.TreeApi.arrayCopyChildNodes(this.root);
 this._insertChildren();
 this.fire('dom-change');
 }
-});</script><dom-module id="x-a"><template>
+});</script><!--src\test\resources\minifier-all\source\x-premier.html--><dom-module id="x-a"><template>
 	Hello [[a]] !!
 	</template><script>
 		Polymer( {
@@ -8213,14 +8213,22 @@ this.fire('dom-change');
 				a: String,
 			}
 		} );
-	</script></dom-module><dom-module id="x-b"><template><p>Posts:</p><ul><template is="dom-repeat" items="[[a]]"><li>{{item.name}}</li></template></ul></template><script>
+	</script></dom-module><!--src\test\resources\minifier-all\source\x-second.html--><dom-module id="x-b"><template><p>Posts:</p><ul><template is="dom-repeat" items="[[a]]"><li>{{item.name}}</li></template></ul></template><script>
 		Polymer( {
 			is:'x-b',
 			properties: {
 				a: Array,
 			}
 		} );
-	</script></dom-module><dom-module id="x-c"><template><x-a a="{{a}}"></x-a><x-b a="[[b]]"></x-b></template><script>
+	</script><!--src\test\resources\minifier-all\source\my-custom-behavior.html--><script>
+    window.MyCustomBehavior = MyCustomBehavior = {
+    	debug: function () {
+    		let p = document.createElement( 'p' );
+    		p.innerHTML = 'Hello World';
+    		document.body.appendChild( p );
+    	}	
+    };
+</script></dom-module><!--src\test\resources\minifier-all\source\x-main.html--><dom-module id="x-c"><template><x-a a="{{a}}"></x-a><x-b a="[[b]]"></x-b></template><script>
 		Polymer( {
 			is:'x-c',
 			properties: {
@@ -8230,9 +8238,15 @@ this.fire('dom-change');
 					value: [
 					    { name: 'Alice'},
 					    { name: 'Bob'},
-					    { name: 'Charles'},
+					    { name: 'Charles'}
 					]
 				}
+			},
+			behaviors: [
+			    MyCustomBehavior
+			],
+			ready: function () {
+				this.debug();
 			}
 		} );
 	</script></dom-module></div></body></html>

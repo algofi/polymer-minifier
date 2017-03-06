@@ -20,6 +20,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
@@ -44,13 +46,13 @@ public class MinifierMojo extends AbstractMojo {
 
 	@Parameter(name = "minifyBlanks", defaultValue = "true")
 	private boolean minifyBlanks;
-	
-	@Parameter(name = "minifiyhtmlComments", defaultValue = "true")
-	private boolean minifiyHtmlComments;
-	
+
+	@Parameter(name = "minifyHtmlComments", defaultValue = "true")
+	private boolean minifyHtmlComments;
+
 	@Parameter(name = "minifyProperties", defaultValue = "false")
 	private boolean minifyProperties;
-	
+
 	@Parameter(name = "minifyPolymerName", defaultValue = "true")
 	private boolean minifyPolymerName;
 
@@ -86,7 +88,7 @@ public class MinifierMojo extends AbstractMojo {
 		if (minifyBlanks) {
 			minifiers.add(new BlankMinifier());
 		}
-		if (minifiyHtmlComments) {
+		if (minifyHtmlComments) {
 			minifiers.add(new HTMLCommentMinifier());
 		}
 		if (minifyProperties) {
@@ -95,11 +97,12 @@ public class MinifierMojo extends AbstractMojo {
 		if (minifyPolymerName) {
 			minifiers.add(new PolymerNameMinifier());
 		}
+		if (minifyJavascript) {
+			minifiers.add(new JavascriptPropertiesMinifier());
+			minifiers.add(new JavascriptMinifier());
+		}
 
 		final ElementsMinifier minifier = new ElementsMinifier(no, minifiers.toArray(new Minifier[minifiers.size()]));
-		if (minifyJavascript) {
-			minifier.setMinifyJavascript(minifyJavascript);
-		}
 		return minifier;
 	}
 

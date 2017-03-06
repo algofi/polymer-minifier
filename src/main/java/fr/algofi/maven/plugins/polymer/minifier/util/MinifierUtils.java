@@ -32,12 +32,17 @@ public class MinifierUtils {
 
 		final Elements scripts = document.getElementsByTag("script");
 
-		final Element script = scripts.get(0);
-		scriptPart.setScript(script.html());
-		String bulkScript = script.outerHtml();
-		bulkScript = bulkScript.substring(bulkScript.indexOf(">") + 1);
-		bulkScript = bulkScript.replace("</script>", "");
-		scriptPart.setBulkScript(bulkScript);
+		if ( scripts.size() > 0 ) {
+			final Element script = scripts.get(0);
+			scriptPart.setScript(script.html());
+			String bulkScript = script.outerHtml();
+			bulkScript = bulkScript.substring(bulkScript.indexOf(">") + 1);
+			bulkScript = bulkScript.replace("</script>", "");
+			scriptPart.setBulkScript(bulkScript);
+		} else {
+			scriptPart.setScript("");
+			scriptPart.setBulkScript("");
+		}
 
 		return scriptPart;
 	}

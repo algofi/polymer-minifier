@@ -5,10 +5,18 @@ import static fr.algofi.maven.plugins.polymer.minifier.util.StringUtils.offset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.Token;
 
+import fr.algofi.maven.plugins.polymer.minifier.PolymerParser;
+
 public class JavascriptUtils {
+	
+	private static final Logger LOGGER = LogManager.getLogger(PolymerParser.class);
+
 	private JavascriptUtils() {
 	}
 
@@ -63,6 +71,29 @@ public class JavascriptUtils {
 		return nodes;
 	}
 
+	public static List<Node> find(final Node parentNode, final Token token, final int maxdepth) {
+		return find(parentNode, token, maxdepth, 0);
+	}
+
+	private static List<Node> find(final Node parentNode, final Token token, final int maxdepth, int currentDepth) {
+		final List<Node> nodes = new ArrayList<>();
+
+		if (parentNode != null && currentDepth <= maxdepth) {
+
+			// check this node
+			if (parentNode.getToken() == token) {
+				nodes.add(parentNode);
+			}
+
+			// check the 1st child
+			nodes.addAll(find(parentNode.getFirstChild(), token, maxdepth, currentDepth + 1));
+			// check next node
+			nodes.addAll(find(parentNode.getNext(), token, maxdepth, currentDepth));
+		}
+
+		return nodes;
+	}
+
 	/**
 	 * print a tree of nodes
 	 * 
@@ -76,7 +107,7 @@ public class JavascriptUtils {
 	 */
 	public static void showNode(final String type, final Node node, final int offset) {
 		if (node != null) {
-			System.out.println(type.toUpperCase() + " - " + offset(offset) + node);
+			LOGGER.debug(type.toUpperCase() + " - " + offset(offset) + node);
 			showNode("child", node.getFirstChild(), offset + 1);
 			showNode("next ", node.getNext(), offset + 1);
 		}

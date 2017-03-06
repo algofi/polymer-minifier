@@ -2,6 +2,7 @@
 
 <link rel="import" href="x-premier.html">
 <link rel="import" href="x-second.html">
+<link rel="import" href="my-custom-behavior.html">
 
 <dom-module id="x-main">
 	<template>
@@ -18,9 +19,15 @@
 					value: [
 					    { name: 'Alice'},
 					    { name: 'Bob'},
-					    { name: 'Charles'},
+					    { name: 'Charles'}
 					]
 				}
+			},
+			behaviors: [
+			    MyCustomBehavior
+			],
+			ready: function () {
+				this.debug();
 			}
 		} );
 	</script>

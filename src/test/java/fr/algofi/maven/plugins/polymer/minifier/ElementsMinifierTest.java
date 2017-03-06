@@ -47,7 +47,7 @@ public class ElementsMinifierTest {
 		final String expectedContent = Files.readAllLines(expectedContentPath).stream()
 				.collect(Collectors.joining("\n"));
 		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "build",
-				"index.build.html");
+				"index.html");
 		final String expectedIndex = Files.readAllLines(expectedIndexPath).stream().collect(Collectors.joining("\n"));
 
 		// input

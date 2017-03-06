@@ -48,7 +48,8 @@ public class PolymerParser {
 	 * component properties object.
 	 */
 	private final String PROPERTIES_SCRIPT_PROLOGUE = "function Polymer( o ) { return o.properties ; }\n";
-	private final String COMPONENT_NAME_SCRIPT_PROLOGUE = "function Polymer( o ) { return o.is ; }\n";
+	// private final String COMPONENT_NAME_SCRIPT_PROLOGUE = "function Polymer(o
+	// ) { return o.is ; }\n";
 
 	/**
 	 * constructor: create the JAVAScript
@@ -69,22 +70,38 @@ public class PolymerParser {
 			final ScriptPart script = MinifierUtils.extractScript(document);
 
 			final PolymerComponent polymer = new PolymerComponent();
-
 			String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
-			content = content.replaceAll("<link\\p{Blank}+rel=\"import\"[^>]+>", "");
 			polymer.setContent(content.trim());
 
+			final List<PolymerComponent> imports = extractImports(path, document, polymer);
+
+
+			// final Compiler compiler = new Compiler();
+			// final SourceFile src = SourceFile.fromCode(path,
+			// script.getBulkScript());
+			// final Node root = compiler.parse(src);
+
+			// if (compiler.getErrorCount() > 0) {
+			// String message =
+			// Arrays.asList(compiler.getErrors()).stream().map(err ->
+			// err.toString())
+			// .collect(Collectors.joining("\n"));
+			// LOGGER.error(message);
+			// // throw new PolymerParserException(message);
+			// }
+
+			LOGGER.debug("Parsing file: " + path);
+			// showNode("root", root, 0);
+
 			try {
-				final Map<String, PolymerProperty> properties = extractPolymerProperties(script.getScript());
+				final Map<String, PolymerProperty> properties = extractPolymerProperties(script.getBulkScript());
 				polymer.setProperties(properties);
-				final String name = extractPolymerName(script.getScript());
+				final String name = extractPolymerName(document);
 				polymer.setName(name);
 			} catch (ScriptException e) {
 				// exception ignored
 				LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
 			}
-
-			final List<PolymerComponent> imports = extractImports(path, document);
 
 			polymer.setPath(path);
 			polymer.setImports(imports);
@@ -97,9 +114,10 @@ public class PolymerParser {
 
 	}
 
-	private List<PolymerComponent> extractImports(final String path, final Document document)
-			throws PolymerParserException {
+	private List<PolymerComponent> extractImports(final String path, final Document document,
+			PolymerComponent component) throws PolymerParserException {
 		final List<PolymerComponent> imports = new ArrayList<>();
+		String content = component.getContent();
 
 		final Elements links = document.getElementsByTag("link");
 
@@ -112,18 +130,63 @@ public class PolymerParser {
 
 				final PolymerComponent polymer = read(importPath);
 				imports.add(polymer);
+
+				content = content.replace(link.outerHtml(), "");
+			}
+
+		}
+
+		final Elements scripts = document.getElementsByTag("script");
+		for (Element script : scripts) {
+			final String src = script.attr("src");
+			if (src != null && src.trim().length() > 0) {
+				final String importPath = Paths.get(path, "..").normalize().resolve(Paths.get(src)).normalize()
+						.toString();
+
+				final PolymerComponent polymer = read(importPath);
+				imports.add(polymer);
+				content = content.replace(script.outerHtml(), "");
+				content = content.replace(script.outerHtml().replace('"', '\''), "");
 			}
 		}
+		
+		component.setContent(content);
 
 		return imports;
 	}
 
-	private String extractPolymerName(String script) throws ScriptException {
-		return (String) scriptEngine.eval(COMPONENT_NAME_SCRIPT_PROLOGUE + script);
+	private String extractPolymerName(final Document document) throws ScriptException {
+
+		final Elements domModules = document.getElementsByTag("dom-module");
+
+		if (domModules.size() == 1) {
+			return domModules.get(0).attr("id");
+		}
+
+		return null;
 	}
 
-	private Map<String, PolymerProperty> extractPolymerProperties(String script) throws ScriptException {
+	private Map<String, PolymerProperty> extractPolymerProperties(
+			/* Node root */ final String script) throws ScriptException {
 		final Map<String, PolymerProperty> properties = new HashMap<>();
+
+		// final List<Node> polymerNodes = find(root, Token.NAME, "Polymer");
+		// if (polymerNodes.size() == 1) {
+		// final Node polymerNode = polymerNodes.get(0);
+		// final List<Node> propertiesNodes = find(polymerNode,
+		// Token.STRING_KEY, "properties");
+		// if (propertiesNodes.size() == 1) {
+		// final List<Node> propertyEntryNodes =
+		// find(propertiesNodes.get(0).getFirstChild(), Token.STRING_KEY, 1);
+		// propertyEntryNodes.stream().forEach(node -> {
+		// final String propertyName = node.getString();
+		// final PolymerProperty property = new PolymerProperty();
+		// property.setName(propertyName);
+		// properties.put(propertyName, property);
+		// });
+		//
+		// }
+		// }
 
 		final ScriptObjectMirror mirror = (ScriptObjectMirror) scriptEngine.eval(PROPERTIES_SCRIPT_PROLOGUE + script);
 		if (mirror != null) {

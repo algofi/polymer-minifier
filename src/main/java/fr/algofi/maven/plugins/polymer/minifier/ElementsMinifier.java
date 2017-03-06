@@ -96,7 +96,7 @@ public class ElementsMinifier {
 
 		try {
 			final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
-			final Path path = getImportPath(index, indexContent);
+			final Path path = getEntryPointImportPath(index, indexContent);
 
 			final String minifiedContent = minifyElements(path);
 			String miniIndex = changeImportLink(indexContent);
@@ -199,19 +199,27 @@ public class ElementsMinifier {
 	 * @throws MinifierException
 	 *             thrown in the case no import if found
 	 */
-	private Path getImportPath(final Path index, final String indexContent) throws MinifierException {
+	private Path getEntryPointImportPath(final Path index, final String indexContent) throws MinifierException {
 
 		indexDocument = Jsoup.parse(indexContent);
 		final Elements links = indexDocument.getElementsByTag("link");
 
 		final List<Path> imports = new ArrayList<>();
+		Path parent = index.getParent();
 
 		for (Element link : links) {
 			final String rel = link.attr("rel");
 			if ("import".equals(rel)) {
 				importHref = link.attr("href").trim();
 				importHtml = link.outerHtml();
-				importPath = index.getParent().normalize().resolve(Paths.get(importHref)).normalize();
+				if (parent == null) {
+					if (importHref.startsWith("/")) {
+						importHref = "." + importHref;
+					}
+					importPath = Paths.get(importHref).normalize();
+				} else {
+					importPath = parent.normalize().resolve(Paths.get(importHref)).normalize();
+				}
 				imports.add(importPath);
 			}
 		}
@@ -246,6 +254,11 @@ public class ElementsMinifier {
 
 			polymerMinifier.minify(component, dependencyElements);
 
+			LOGGER.info("Appending file: " + component.getPath());
+
+			builder.append("<!--");
+			builder.append(component.getPath());
+			builder.append("-->");
 			builder.append(component.getMinifiedContent());
 		}
 
@@ -268,21 +281,33 @@ public class ElementsMinifier {
 			final Map<String, PolymerComponent> components = new LinkedHashMap<>();
 			final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
 
+			Path parent = path.getParent();
+
+			/*
+			 * read HTML imports
+			 */
+
 			final Elements links = document.getElementsByTag("link");
 			for (Element link : links) {
 				final String rel = link.attr("rel");
 				if ("import".equals(rel)) {
 					final String href = link.attr("href");
-					final Path importPath = path.getParent().normalize().resolve(Paths.get(href)).normalize();
-					LOGGER.debug("path = " + importPath);
+					final PolymerComponent dependency = readDependency(parent, href);
+					appendComponent(dependency, components);
 
-					try {
-						final PolymerComponent component = parser.read(importPath.toString());
-						appendComponent(component, components);
-					} catch (PolymerParserException e) {
-						throw new MinifierException("Cannot read a dependency" + importPath, e);
-					}
+				}
+			}
 
+			/*
+			 * read script inclusion : <script src="foo.js"></script>
+			 */
+
+			final Elements scripts = document.getElementsByTag("script");
+			for (Element script : scripts) {
+				final String src = script.attr("src");
+				if (src != null && src.trim().length() > 0) {
+					final PolymerComponent dependency = readDependency(parent, src);
+					appendComponent(dependency, components);
 				}
 			}
 
@@ -290,6 +315,32 @@ public class ElementsMinifier {
 		} catch (IOException e) {
 			throw new MinifierException("Cannot parse the web page " + path, e);
 		}
+	}
+
+	private PolymerComponent readDependency(final Path parent, final String href) throws MinifierException {
+		final Path importPath = getImportPath(parent, href);
+
+		try {
+			return parser.read(importPath.toString());
+		} catch (PolymerParserException e) {
+			throw new MinifierException("Cannot read a dependency" + importPath, e);
+		}
+	}
+
+	private Path getImportPath(Path parent, final String href) {
+		final Path importPath;
+		if (parent == null) {
+			if (importHref.startsWith("/")) {
+				importHref = "." + importHref;
+			}
+			importPath = Paths.get(importHref).normalize();
+		} else {
+			importPath = parent.normalize().resolve(Paths.get(href)).normalize();
+		}
+		// final Path importPath =
+		// path.getParent().normalize().resolve(Paths.get(href)).normalize();
+		LOGGER.debug("path = " + importPath);
+		return importPath;
 	}
 
 	/**
@@ -320,20 +371,6 @@ public class ElementsMinifier {
 			components.put(component.getPath(), component);
 		}
 
-	}
-
-	/**
-	 * enable JS minification
-	 * 
-	 * @param minifyJavascript
-	 *            true to minify JS
-	 */
-	public void setMinifyJavascript(boolean minifyJavascript) {
-		if (minifyJavascript) {
-			polymerMinifier.addMinifier(javascriptMinifier);
-		} else {
-			polymerMinifier.removeMinifier(javascriptMinifier);
-		}
 	}
 
 }

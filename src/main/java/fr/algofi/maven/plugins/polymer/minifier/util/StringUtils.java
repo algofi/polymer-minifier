@@ -10,8 +10,8 @@ public class StringUtils {
 	/**
 	 * build a string containing <tt>offset</tt>white spaces.
 	 * 
-	 * @param offset
-	 * @return
+	 * @param offset number of spaces to append
+	 * @return string with only <tt>offset</tt> spaces
 	 */
 	public static String offset(int offset) {
 		final StringBuilder builder = new StringBuilder();
