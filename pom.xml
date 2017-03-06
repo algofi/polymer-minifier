@@ -86,6 +86,14 @@
 			<systemPath>${java.home}/lib/ext/nashorn.jar</systemPath>
 		</dependency>
 
+		<!-- we use a jetty server to server static file or testing purpose -->
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.4.2.v20170220</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
