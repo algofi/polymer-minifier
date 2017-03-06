@@ -4,7 +4,7 @@
 
 This maven-plugin build a set of polymer elements into a single file and **minifying** each of them.
 
-### Minification rules
+### The following rules are applied
 
 * HTML blanks removal
 * polymer custom tag and properties minification
