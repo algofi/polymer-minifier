@@ -19,17 +19,17 @@ public class SiteServerMain {
 		
 		// example
 		port = 9002;
-		webRoot = "../my-app/target/polymer-minifier-integration-test";
+		webRoot = "src/test/resources/my-app/target/polymer-minifier-integration-test";
 		startStaticServer(port, webRoot);
 		
 		// example
 		port = 9003;
-		webRoot = "../my-app";
+		webRoot = "src/test/resources/my-app";
 		startStaticServer(port, webRoot);
 
 		// example
 		port = 9004;
-		webRoot = "../my-app/target/polymer-minifier-integration-test-mini";
+		webRoot = "src/test/resources/my-app/target/polymer-minifier-integration-test-mini";
 		startStaticServer(port, webRoot);
 		
 	}

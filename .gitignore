@@ -3,3 +3,4 @@
 .settings
 target
 *.asc
+src/test/resources/my-app/target
