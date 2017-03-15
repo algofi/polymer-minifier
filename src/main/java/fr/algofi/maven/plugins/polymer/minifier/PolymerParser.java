@@ -57,7 +57,9 @@ public class PolymerParser {
 	 * 
 	 * @param scriptEngine
 	 *            engine to parse Javascript
-	 * @throws PolymerParserException 
+	 * @throws PolymerParserException
+	 *             when the parser cannot be initialized because the script
+	 *             engine requirements cannot be loaded
 	 */
 	public PolymerParser(final ScriptEngine scriptEngine) throws PolymerParserException {
 		this.scriptEngine = scriptEngine;
@@ -181,8 +183,7 @@ public class PolymerParser {
 		// we remove behaviors array to parse the script
 		script = MinifierUtils.removePolymerBehaviors(script);
 		// replace let by var
-		script = script.replaceAll( "\\blet\\b", "var");
-		
+		script = script.replaceAll("\\blet\\b", "var");
 
 		final ScriptObjectMirror mirror = (ScriptObjectMirror) scriptEngine.eval(PROPERTIES_SCRIPT_PROLOGUE + script);
 		if (mirror != null) {
