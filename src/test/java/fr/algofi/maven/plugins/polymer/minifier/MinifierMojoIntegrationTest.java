@@ -14,8 +14,8 @@ public class MinifierMojoIntegrationTest {
 	@Before
 	public void setup() throws Exception {
 		sut = new MinifierMojo();
-		setFieldValue(sut, "index", "../my-app/index.html");
-		setFieldValue(sut, "outputFolder", "../my-app/target/polymer-minifier-integration-test-mini");
+		setFieldValue(sut, "index", "src/test/resources/my-app/index.html");
+		setFieldValue(sut, "outputFolder", "src/test/resources/my-app/target/polymer-minifier-integration-test-mini");
 		setFieldValue(sut, "gzipElements", Boolean.TRUE);
 		setFieldValue(sut, "minifyBlanks", Boolean.TRUE);
 		setFieldValue(sut, "minifyHtmlComments", Boolean.TRUE);
