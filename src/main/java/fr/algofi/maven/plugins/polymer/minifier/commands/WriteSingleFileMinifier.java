@@ -74,13 +74,13 @@ public class WriteSingleFileMinifier implements Minifier {
 				if (miniFileName.isPresent()) {
 					path = buildOutputFilePath(component, miniFileName.get());
 					LOGGER.debug("Writing " + path);
-					FilesUtils.writeGzip(path, component.getMinifiedContent());
+					FilesUtils.write(path, component.getMinifiedContent());
 				}
 				// 4/ mini file name gzipped
 				if (gzipElements) {
 					miniFileName = getMiniFileName(component, true);
 					if (miniFileName.isPresent()) {
-						path = buildOutputFilePath(component, componentFileName);
+						path = buildOutputFilePath(component, miniFileName.get());
 						LOGGER.debug("Writing " + path);
 						FilesUtils.writeGzip(path, component.getMinifiedContent());
 					}
