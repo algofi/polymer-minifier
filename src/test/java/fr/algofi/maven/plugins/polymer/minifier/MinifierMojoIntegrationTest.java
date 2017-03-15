@@ -19,8 +19,8 @@ public class MinifierMojoIntegrationTest {
 		setFieldValue(sut, "gzipElements", Boolean.TRUE);
 		setFieldValue(sut, "minifyBlanks", Boolean.TRUE);
 		setFieldValue(sut, "minifyHtmlComments", Boolean.TRUE);
-		setFieldValue(sut, "minifyProperties", Boolean.FALSE);
-		setFieldValue(sut, "minifyPolymerName", Boolean.FALSE);
+		setFieldValue(sut, "minifyProperties", Boolean.TRUE);
+		setFieldValue(sut, "minifyPolymerName", Boolean.TRUE);
 		setFieldValue(sut, "minifyJavascript", Boolean.FALSE);
 		setFieldValue(sut, "whiteOnlyJavascript", Boolean.TRUE);
 		setFieldValue(sut, "writeSingleFile", Boolean.TRUE);
