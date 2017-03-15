@@ -45,6 +45,7 @@ public class FilesUtils {
 	 * @param content
 	 *            content to write into the file
 	 * @throws FileNotFoundException
+	 *             thrown if the specified cannot be opened.
 	 */
 	public static void write(final Path path, final String content) throws FileNotFoundException {
 
