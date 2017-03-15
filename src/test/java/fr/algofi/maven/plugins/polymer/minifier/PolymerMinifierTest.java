@@ -22,6 +22,7 @@ import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.WhiteOnlyJavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
@@ -37,6 +38,7 @@ public class PolymerMinifierTest {
 		final Minifier htmlComments = new HTMLCommentMinifier();
 		final Minifier properties = new PolymerPropertiesMinifier();
 		final Minifier polymerName = new PolymerNameMinifier();
+//		final Minifier whiteOnly = new WhiteOnlyJavascriptMinifier();
 		sut = new PolymerMinifier(no, blank, htmlComments, properties, polymerName);
 	}
 
@@ -72,7 +74,7 @@ public class PolymerMinifierTest {
 		assertNotNull(polymer.getProperties());
 		assertEquals(0, polymer.getProperties().size());
 	}
-
+ 
 	@Test
 	public void shouldMinifyOnePropertyThePolymerWebComponentCodeIfOnePropertyGiven()
 			throws IOException, MinifierException {

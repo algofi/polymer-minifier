@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,7 +33,7 @@ public class MinifierUtils {
 
 		final Elements scripts = document.getElementsByTag("script");
 
-		if ( scripts.size() > 0 ) {
+		if (scripts.size() > 0) {
 			final Element script = scripts.get(0);
 			scriptPart.setScript(script.html());
 			String bulkScript = script.outerHtml();
@@ -165,6 +166,60 @@ public class MinifierUtils {
 		}
 
 		return tags;
+	}
+
+	/**
+	 * remove link tag that contains <tt>rel="import"</tt>
+	 * 
+	 * @param content HTML content
+	 * @return string wihout link import
+	 */
+	public static String removeLinkImport(String content) {
+
+		final Document document = Jsoup.parse(content);
+		final Elements elements = document.getElementsByTag("link");
+		for (Element element : elements) {
+			if ("import".equalsIgnoreCase(element.attr("rel"))) {
+
+				// parser should not remove link
+				content = content.replace(element.outerHtml(), "");
+				content = content.replace(element.outerHtml().replace('"', '\''), "");
+			}
+		}
+
+		return content;
+	}
+
+	/**
+	 * Remove external script import
+	 * @param content HTML content
+	 * @return content without external script link
+	 */
+	public static String removeScriptExternalResource(String content) {
+		final Document document = Jsoup.parse(content);
+		final Elements elements = document.getElementsByTag("script");
+		for (Element element : elements) {
+			final String src = element.attr("src");
+			if (src != null && src.trim().length() > 0) {
+
+				content = content.replace(element.outerHtml(), "");
+				content = content.replace(element.outerHtml().replace('"', '\''), "");
+			}
+		}
+
+		return content;
+	}
+
+	/**
+	 * Remove polymer behaviors in order to parse better Polymer component
+	 * @param content script HTML content
+	 * @return content wihout behaviors
+	 */
+	public static String removePolymerBehaviors(String content) {
+		final String regex = "behaviors\\b:\\p{Blank}*\\[[^\\]]*.*\\],[\n\r]?";
+		content = content.replaceAll(regex, "");
+
+		return content;
 	}
 
 }

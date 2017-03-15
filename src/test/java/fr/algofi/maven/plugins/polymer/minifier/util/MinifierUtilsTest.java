@@ -6,7 +6,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,8 +154,75 @@ public class MinifierUtilsTest {
 				tags.iterator().next());
 	}
 
-	
+	@Test
+	public void shouldRemovePolymerBehaviorArray() {
+		// input
+		final List<String> contentLines = new ArrayList<>();
+		contentLines.add("Polymer( {                       ");
+		contentLines.add("	is: 'x-main',                  ");
+		contentLines.add("	properties: {                  ");
+		contentLines.add("		userId: String,            ");
+		contentLines.add("		friends: {                 ");
+		contentLines.add("			type: Array,           ");
+		contentLines.add("			value: [               ");
+		contentLines.add("			    { name: 'Alice'},  ");
+		contentLines.add("			    { name: 'Bob'},    ");
+		contentLines.add("			    { name: 'Charles'} ");
+		contentLines.add("			]                      ");
+		contentLines.add("		}                          ");
+		contentLines.add("	},                             ");
+		contentLines.add("	behaviors: [                   ");
+		contentLines.add("	    MyCustomBehavior           ");
+		contentLines.add("	],                             ");
+		contentLines.add("	ready: function () {           ");
+		contentLines.add("		this.debug();              ");
+		contentLines.add("	}                              ");
+		contentLines.add("} );                             ");
 
-	
+		final String content = contentLines.stream().collect(Collectors.joining("\n"));
+
+		// call
+		final String actualContent = MinifierUtils.removePolymerBehaviors(content);
+
+		// expected
+		final List<String> expectedContentLines = new ArrayList<>();
+		expectedContentLines.add("Polymer( {                       ");
+		expectedContentLines.add("	is: 'x-main',                  ");
+		expectedContentLines.add("	properties: {                  ");
+		expectedContentLines.add("		userId: String,            ");
+		expectedContentLines.add("		friends: {                 ");
+		expectedContentLines.add("			type: Array,           ");
+		expectedContentLines.add("			value: [               ");
+		expectedContentLines.add("			    { name: 'Alice'},  ");
+		expectedContentLines.add("			    { name: 'Bob'},    ");
+		expectedContentLines.add("			    { name: 'Charles'} ");
+		expectedContentLines.add("			]                      ");
+		expectedContentLines.add("		}                          ");
+		expectedContentLines.add("	},                             ");
+		expectedContentLines.add("	                             ");
+		expectedContentLines.add("	ready: function () {           ");
+		expectedContentLines.add("		this.debug();              ");
+		expectedContentLines.add("	}                              ");
+		expectedContentLines.add("} );                             ");
+
+		final String expectedContent = expectedContentLines.stream().collect(Collectors.joining("\n"));
+
+		// assertions
+		assertNotNull(actualContent);
+		assertEquals(expectedContent, actualContent);
+
+	}
+
+	@Test
+	public void testPaths() {
+		final Path src = Paths.get("src", "main", "webapp");
+		final Path target = Paths.get("target", "polymer-minimizer");
+		
+		final Path componentPath = Paths.get("src", "main", "webapp", "my-element", "my-element.html"); 
+		
+		final Path actual = src.relativize(target).resolve(src.relativize(componentPath));
+		
+		System.out.println( actual );
+	}
 
 }

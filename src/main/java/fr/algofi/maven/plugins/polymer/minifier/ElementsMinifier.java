@@ -25,13 +25,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.DependenciesMinifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.util.MiniNameProvider;
+import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
 /**
  * minify a set of web component
@@ -49,18 +49,21 @@ public class ElementsMinifier {
 	private Path importPath;
 	private String importHref;
 	private String buildHref;
-	private String importHtml;
+	// private String importHtml;
 
 	private Minifier dependenciesMinifier;
 
-	private Minifier javascriptMinifier = new JavascriptMinifier();
-
-	public ElementsMinifier(Minifier minifier, Minifier... minifiers) {
+	public ElementsMinifier(Minifier minifier, Minifier... minifiers) throws MinifierException {
 
 		polymerMinifier = new PolymerMinifier(minifier, minifiers);
 
-		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
-		parser = new PolymerParser(scriptEngine);
+		final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+		final ScriptEngine scriptEngine = scriptEngineManager.getEngineByName("nashorn");
+		try {
+			parser = new PolymerParser(scriptEngine);
+		} catch (PolymerParserException e) {
+			throw new MinifierException("Fail to initialize the polymer parser", e);
+		}
 
 		final MiniNameProvider provider = new MiniNameProvider();
 		final List<String> componentNames = provider.provide().stream()
@@ -94,23 +97,56 @@ public class ElementsMinifier {
 	 */
 	public MiniElements minimize(final Path index) throws MinifierException {
 
+		if (!index.toString().endsWith(".html")) {
+			throw new MinifierException("The index must have 'html' as its extension");
+		}
+
 		try {
 			final String indexContent = Files.readAllLines(index).stream().collect(Collectors.joining("\n"));
 			final Path path = getEntryPointImportPath(index, indexContent);
 
 			final String minifiedContent = minifyElements(path);
-			String miniIndex = changeImportLink(indexContent);
-			miniIndex = minifyIndexEntryPointDependencies(miniIndex);
+			String miniIndexContent = minifyIndexEntryPointDependencies(indexContent);
+			String buildIndexContent = changeImportLink(miniIndexContent);
 
 			final MiniElements minimized = new MiniElements();
-			minimized.setContent(minifiedContent);
-			minimized.setIndexContent(miniIndex);
-			minimized.setImportBuildHref(buildHref);
+			minimized.setBuildContent(minifiedContent);
+			minimized.setBuildFileName("elements.build.html");
+
+			minimized.setBuildIndexContent(buildIndexContent);
+			minimized.setMiniIndexContent(miniIndexContent);
+
+			showSummary();
 
 			return minimized;
 		} catch (IOException e) {
 			throw new MinifierException("Cannot read input files", e);
 		}
+	}
+
+	private String makeBuildIndexPath(Path index) {
+
+		final Path parent = index.getParent();
+		final String filename = index.toFile().getName().replace(".html", ".build.html");
+
+		return parent.resolve(filename).toString();
+	}
+
+	private void showSummary() {
+		LOGGER.debug("Summary :");
+		for (PolymerComponent component : components.values()) {
+			final String path = component.getPath();
+			final String name = component.getName();
+			final String miniName = component.getMiniName();
+			final String properties = component.getProperties().values().stream()
+					.map(prop -> prop.getName() + ":" + prop.getMiniName()).collect(Collectors.joining(","));
+			if (name == null) {
+				LOGGER.debug("Import " + path);
+			} else {
+				LOGGER.debug("Web Component " + path + " " + name + "->" + miniName + " properties= " + properties);
+			}
+		}
+
 	}
 
 	/**
@@ -159,7 +195,8 @@ public class ElementsMinifier {
 	private String changeImportLink(String indexContent) {
 
 		buildHref = importHref.replaceFirst(".html", ".build.html");
-		indexContent = indexContent.replaceFirst(importHtml, "<link rel=\"import\" href=\"" + buildHref + "\">");
+		// indexContent = indexContent.replaceFirst(importHtml, "<link
+		// rel=\"import\" href=\"" + buildHref + "\">");
 
 		return indexContent;
 	}
@@ -175,7 +212,8 @@ public class ElementsMinifier {
 	 */
 	private String minifyElements(final Path path) throws MinifierException {
 		// component already appended
-		components = getAndOrderAllComponents(path);
+		components = new LinkedHashMap<>();
+		getAndOrderAllComponents(path, components);
 
 		// give to the minifier a collection of all dependencies
 		// minifier.addMinifier(dependencyElements);
@@ -202,16 +240,16 @@ public class ElementsMinifier {
 	private Path getEntryPointImportPath(final Path index, final String indexContent) throws MinifierException {
 
 		indexDocument = Jsoup.parse(indexContent);
-		final Elements links = indexDocument.getElementsByTag("link");
+		final Elements metas = indexDocument.getElementsByTag("meta");
 
 		final List<Path> imports = new ArrayList<>();
 		Path parent = index.getParent();
 
-		for (Element link : links) {
-			final String rel = link.attr("rel");
-			if ("import".equals(rel)) {
-				importHref = link.attr("href").trim();
-				importHtml = link.outerHtml();
+		for (Element meta : metas) {
+			final String name = meta.attr("name");
+			if ("elements".equals(name)) {
+				importHref = meta.attr("content").trim();
+				// importHtml = link.outerHtml();
 				if (parent == null) {
 					if (importHref.startsWith("/")) {
 						importHref = "." + importHref;
@@ -221,10 +259,35 @@ public class ElementsMinifier {
 					importPath = parent.normalize().resolve(Paths.get(importHref)).normalize();
 				}
 				imports.add(importPath);
+
 			}
 		}
 
-		if (imports.isEmpty() || imports.size() > 1) {
+		// indexDocument = Jsoup.parse(indexContent);
+		// final Elements links = indexDocument.getElementsByTag("link");
+		//
+		//
+		// for (Element link : links) {
+		// final String rel = link.attr("rel");
+		// if ("import".equals(rel)) {
+		// importHref = link.attr("href").trim();
+		// importHtml = link.outerHtml();
+		// if (parent == null) {
+		// if (importHref.startsWith("/")) {
+		// importHref = "." + importHref;
+		// }
+		// importPath = Paths.get(importHref).normalize();
+		// } else {
+		// importPath =
+		// parent.normalize().resolve(Paths.get(importHref)).normalize();
+		// }
+		// imports.add(importPath);
+		// }
+		// }
+
+		if (imports.isEmpty()) {
+			throw new MinifierException("No import tag was found");
+		} else if (imports.size() > 1) {
 			throw new MinifierException("Only one Import tag is supported");
 		} else {
 			return imports.get(0);
@@ -259,7 +322,11 @@ public class ElementsMinifier {
 			builder.append("<!--");
 			builder.append(component.getPath());
 			builder.append("-->");
-			builder.append(component.getMinifiedContent());
+
+			String minifiedContent = MinifierUtils.removeLinkImport(component.getMinifiedContent());
+			minifiedContent = MinifierUtils.removeScriptExternalResource(minifiedContent);
+
+			builder.append(minifiedContent);
 		}
 
 	}
@@ -275,10 +342,10 @@ public class ElementsMinifier {
 	 *             in the case we cannot read the given page or we cannot parse
 	 *             the polymer component
 	 */
-	private Map<String, PolymerComponent> getAndOrderAllComponents(final Path path) throws MinifierException {
+	private void getAndOrderAllComponents(final Path path, final Map<String, PolymerComponent> components)
+			throws MinifierException {
 		try {
 
-			final Map<String, PolymerComponent> components = new LinkedHashMap<>();
 			final Document document = Jsoup.parse(path.toFile(), Charset.defaultCharset().name());
 
 			Path parent = path.getParent();
@@ -292,8 +359,10 @@ public class ElementsMinifier {
 				final String rel = link.attr("rel");
 				if ("import".equals(rel)) {
 					final String href = link.attr("href");
-					final PolymerComponent dependency = readDependency(parent, href);
-					appendComponent(dependency, components);
+					if (!components.containsKey(href)) {
+						final PolymerComponent dependency = readDependency(parent, href);
+						appendComponent(dependency, components);
+					}
 
 				}
 			}
@@ -306,12 +375,13 @@ public class ElementsMinifier {
 			for (Element script : scripts) {
 				final String src = script.attr("src");
 				if (src != null && src.trim().length() > 0) {
-					final PolymerComponent dependency = readDependency(parent, src);
-					appendComponent(dependency, components);
+					if (!components.containsKey(src)) {
+						final PolymerComponent dependency = readDependency(parent, src);
+						appendComponent(dependency, components);
+					}
 				}
 			}
 
-			return components;
 		} catch (IOException e) {
 			throw new MinifierException("Cannot parse the web page " + path, e);
 		}
@@ -323,7 +393,7 @@ public class ElementsMinifier {
 		try {
 			return parser.read(importPath.toString());
 		} catch (PolymerParserException e) {
-			throw new MinifierException("Cannot read a dependency" + importPath, e);
+			throw new MinifierException("Cannot read a dependency " + importPath, e);
 		}
 	}
 

@@ -23,8 +23,13 @@ TODO maven configuration example
 * single file built
 
 #### 2.x
-* Javascript minification
-With a special thank to [Google Closure Compiler](https://github.com/google/closure-compiler).
+
+Javascript minification
+* Javascript compile with [Google Closure Compiler](https://github.com/google/closure-compiler) is **not working**
+* Use an hand made minifier that remove blanks in Javascript and rename minimized polymer component properties.
+
+* each source file is minified separatly and written down to the disk.
+* each minified file is also gzipped
 
 #### 3.x (soon)
 * CSS minification

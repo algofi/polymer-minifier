@@ -27,7 +27,7 @@ public class ElementsMinifierTest {
 	private ElementsMinifier sut;
 
 	@Before
-	public void setup() {
+	public void setup() throws MinifierException {
 		final Minifier no = new NoMinifier();
 		final Minifier blank = new BlankMinifier();
 		final Minifier htmlComments = new HTMLCommentMinifier();
@@ -59,9 +59,9 @@ public class ElementsMinifierTest {
 
 		// asasertions
 		assertNotNull(minimized);
-		assertEquals(expectedContent, minimized.getContent());
-		assertEquals(expectedIndex, minimized.getIndexContent());
-		assertEquals("elements.build.html", minimized.getImportBuildHref());
+		assertEquals(expectedContent, minimized.getBuilldContent());
+		assertEquals(expectedIndex, minimized.getBuildIndexContent());
+		assertEquals("elements.build.html", minimized.getBuildFileName());
 
 	}
 }

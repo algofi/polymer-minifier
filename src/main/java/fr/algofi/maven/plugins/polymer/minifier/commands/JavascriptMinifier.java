@@ -9,6 +9,12 @@ import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
+/**
+ * @deprecated use JavascriptPropertiesMinifier instead
+ * @author cjechoux
+ *
+ */
+@Deprecated
 public class JavascriptMinifier implements Minifier {
 
 	/**

@@ -1,16 +1,17 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -47,63 +48,66 @@ public class PolymerParser {
 	 * script prologue. We redefine Polymer function to returns the polymer web
 	 * component properties object.
 	 */
-	private final String PROPERTIES_SCRIPT_PROLOGUE = "function Polymer( o ) { return o.properties ; }\n";
-	// private final String COMPONENT_NAME_SCRIPT_PROLOGUE = "function Polymer(o
-	// ) { return o.is ; }\n";
+	private final String PROPERTIES_SCRIPT_PROLOGUE;
+
+	private final Map<String, PolymerComponent> components = new HashMap<>();
 
 	/**
 	 * constructor: create the JAVAScript
 	 * 
 	 * @param scriptEngine
 	 *            engine to parse Javascript
+	 * @throws PolymerParserException 
 	 */
-	public PolymerParser(final ScriptEngine scriptEngine) {
+	public PolymerParser(final ScriptEngine scriptEngine) throws PolymerParserException {
 		this.scriptEngine = scriptEngine;
+		final String resource = "/polymer_mock.js";
+		try {
+			PROPERTIES_SCRIPT_PROLOGUE = readContent(getClass().getResourceAsStream(resource));
+		} catch (IOException e) {
+			throw new PolymerParserException("Cannot initialize the parser", e);
+		}
 	}
 
 	public PolymerComponent read(final String path) throws PolymerParserException {
 
+		if (components.containsKey(path)) {
+			LOGGER.debug("Get the component from the cache " + path);
+			return components.get(path);
+		}
+
+		LOGGER.debug("Parsing file: " + path);
+
 		try {
 
-			final Document document = Jsoup.parse(new File(path), Charset.defaultCharset().name());
+			final String content = readContent(path);
+			final Document document = Jsoup.parse(content);
 
 			final ScriptPart script = MinifierUtils.extractScript(document);
 
 			final PolymerComponent polymer = new PolymerComponent();
-			String content = Files.readAllLines(Paths.get(path)).stream().collect(Collectors.joining("\n"));
+			polymer.setPath(path);
+			// register the component
+			components.put(path, polymer);
+
+			// read content
 			polymer.setContent(content.trim());
 
-			final List<PolymerComponent> imports = extractImports(path, document, polymer);
+			final String name = extractPolymerName(document);
+			polymer.setName(name);
 
+			final boolean isDomModule = document.getElementsByTag("dom-module").size() > 0;
 
-			// final Compiler compiler = new Compiler();
-			// final SourceFile src = SourceFile.fromCode(path,
-			// script.getBulkScript());
-			// final Node root = compiler.parse(src);
-
-			// if (compiler.getErrorCount() > 0) {
-			// String message =
-			// Arrays.asList(compiler.getErrors()).stream().map(err ->
-			// err.toString())
-			// .collect(Collectors.joining("\n"));
-			// LOGGER.error(message);
-			// // throw new PolymerParserException(message);
-			// }
-
-			LOGGER.debug("Parsing file: " + path);
-			// showNode("root", root, 0);
-
-			try {
-				final Map<String, PolymerProperty> properties = extractPolymerProperties(script.getBulkScript());
-				polymer.setProperties(properties);
-				final String name = extractPolymerName(document);
-				polymer.setName(name);
-			} catch (ScriptException e) {
-				// exception ignored
-				LOGGER.warn("cannot parse the file : " + path + " . Cause : " + e.getMessage());
+			if (isDomModule) {
+				try {
+					final Map<String, PolymerProperty> properties = extractPolymerProperties(script.getBulkScript());
+					polymer.setProperties(properties);
+				} catch (ScriptException e) {
+					throw new PolymerParserException("cannot parse the file : " + path, e);
+				}
 			}
 
-			polymer.setPath(path);
+			final List<PolymerComponent> imports = extractImports(path, document, polymer);
 			polymer.setImports(imports);
 
 			return polymer;
@@ -131,7 +135,8 @@ public class PolymerParser {
 				final PolymerComponent polymer = read(importPath);
 				imports.add(polymer);
 
-				content = content.replace(link.outerHtml(), "");
+				// parser should not remove link
+				// content = content.replace(link.outerHtml(), "");
 			}
 
 		}
@@ -143,19 +148,22 @@ public class PolymerParser {
 				final String importPath = Paths.get(path, "..").normalize().resolve(Paths.get(src)).normalize()
 						.toString();
 
+				// don't parse the component if it was already parsed
 				final PolymerComponent polymer = read(importPath);
 				imports.add(polymer);
-				content = content.replace(script.outerHtml(), "");
-				content = content.replace(script.outerHtml().replace('"', '\''), "");
+				// parser should not remove link
+				// content = content.replace(script.outerHtml(), "");
+				// content = content.replace(script.outerHtml().replace('"',
+				// '\''), "");
 			}
 		}
-		
+
 		component.setContent(content);
 
 		return imports;
 	}
 
-	private String extractPolymerName(final Document document) throws ScriptException {
+	private String extractPolymerName(final Document document) {
 
 		final Elements domModules = document.getElementsByTag("dom-module");
 
@@ -167,26 +175,14 @@ public class PolymerParser {
 	}
 
 	private Map<String, PolymerProperty> extractPolymerProperties(
-			/* Node root */ final String script) throws ScriptException {
+			/* Node root */ String script) throws ScriptException {
 		final Map<String, PolymerProperty> properties = new HashMap<>();
 
-		// final List<Node> polymerNodes = find(root, Token.NAME, "Polymer");
-		// if (polymerNodes.size() == 1) {
-		// final Node polymerNode = polymerNodes.get(0);
-		// final List<Node> propertiesNodes = find(polymerNode,
-		// Token.STRING_KEY, "properties");
-		// if (propertiesNodes.size() == 1) {
-		// final List<Node> propertyEntryNodes =
-		// find(propertiesNodes.get(0).getFirstChild(), Token.STRING_KEY, 1);
-		// propertyEntryNodes.stream().forEach(node -> {
-		// final String propertyName = node.getString();
-		// final PolymerProperty property = new PolymerProperty();
-		// property.setName(propertyName);
-		// properties.put(propertyName, property);
-		// });
-		//
-		// }
-		// }
+		// we remove behaviors array to parse the script
+		script = MinifierUtils.removePolymerBehaviors(script);
+		// replace let by var
+		script = script.replaceAll( "\\blet\\b", "var");
+		
 
 		final ScriptObjectMirror mirror = (ScriptObjectMirror) scriptEngine.eval(PROPERTIES_SCRIPT_PROLOGUE + script);
 		if (mirror != null) {
@@ -204,4 +200,25 @@ public class PolymerParser {
 		return properties;
 	}
 
+	private static String readContent(final String path) throws IOException {
+
+		try (InputStream inputStream = new FileInputStream(path)) {
+			return readContent(inputStream);
+		}
+
+	}
+
+	private static String readContent(final InputStream inputStream) throws IOException {
+		final StringBuilder builder = new StringBuilder();
+
+		try (Reader streamReader = new InputStreamReader(inputStream)) {
+			try (BufferedReader reader = new BufferedReader(streamReader)) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					builder.append(line).append("\n");
+				}
+			}
+		}
+		return builder.toString();
+	}
 }

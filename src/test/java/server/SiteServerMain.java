@@ -10,26 +10,28 @@ public class SiteServerMain {
 		// expected
 		int port = 9000;
 		String webRoot = "src/test/resources/minifier-all/source";
-		
 		startStaticServer(port, webRoot);
 
 		// actual
 		port = 9001;
 		webRoot = "src/test/resources/minifier-all/build";
-		
 		startStaticServer(port, webRoot);
 		
 		// example
 		port = 9002;
-		webRoot = "../my-app/target/polymer-minifier";
-		
+		webRoot = "../my-app/target/polymer-minifier-integration-test";
 		startStaticServer(port, webRoot);
 		
 		// example
 		port = 9003;
 		webRoot = "../my-app";
-		
 		startStaticServer(port, webRoot);
+
+		// example
+		port = 9004;
+		webRoot = "../my-app/target/polymer-minifier-integration-test-mini";
+		startStaticServer(port, webRoot);
+		
 	}
 
 	private static void startStaticServer(int port, String webRoot) throws Exception {

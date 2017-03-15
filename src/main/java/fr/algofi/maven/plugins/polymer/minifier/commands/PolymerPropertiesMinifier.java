@@ -25,14 +25,14 @@ public class PolymerPropertiesMinifier implements Minifier {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies) throws MinifierException {
-		String content = component.getMinifiedContent();
-
-		final List<String> shortNames = new MiniNameProvider().provide();
-		final Iterator<String> shortNameIterator = shortNames.iterator();
-
+	public void minimize(final PolymerComponent component, final Collection<PolymerComponent> dependencies)
+			throws MinifierException {
 		if (!component.getProperties().isEmpty()) {
-			
+			String content = component.getMinifiedContent();
+
+			final List<String> shortNames = new MiniNameProvider().provide();
+			final Iterator<String> shortNameIterator = shortNames.iterator();
+
 			// minify all property one by one
 			for (final PolymerProperty property : component.getProperties().values()) {
 
@@ -44,9 +44,9 @@ public class PolymerPropertiesMinifier implements Minifier {
 				content = minifyProperties(content, propertyName, miniPropertyName);
 
 			}
+			component.setMiniContent(content);
 		}
 
-		component.setMiniContent(content);
 	}
 
 	private String minifyProperties(String content, String propertyName, String miniPropertyName) {

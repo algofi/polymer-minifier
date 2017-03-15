@@ -2,31 +2,40 @@ package fr.algofi.maven.plugins.polymer.minifier.model;
 
 public class MiniElements {
 
-	private String content;
-	private String indexContent;
-	private String importBuildHref;
+	private String buildContent;
+	private String buildFileName;
+	private String buildIndexContent;
+	private String miniIndexContent;
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setBuildContent(String buildContent) {
+		this.buildContent = buildContent;
 	}
 
-	public String getContent() {
-		return content;
+	public String getBuilldContent() {
+		return buildContent;
 	}
 
-	public String getIndexContent() {
-		return indexContent;
+	public void setBuildFileName(String buildFileName) {
+		this.buildFileName = buildFileName;
 	}
 
-	public void setIndexContent(String indexContent) {
-		this.indexContent = indexContent;
+	public String getBuildFileName() {
+		return buildFileName;
 	}
 
-	public String getImportBuildHref() {
-		return importBuildHref;
+	public void setBuildIndexContent(String buildIndexContent) {
+		this.buildIndexContent = buildIndexContent;
+	}
+
+	public String getBuildIndexContent() {
+		return buildIndexContent;
+	}
+
+	public String getMiniIndexContent() {
+		return miniIndexContent;
 	}
 	
-	public void setImportBuildHref(String importBuildHref) {
-		this.importBuildHref = importBuildHref;
+	public void setMiniIndexContent(String miniIndexContent) {
+		this.miniIndexContent = miniIndexContent;
 	}
 }
