@@ -1,0 +1,72 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+
+<dom-module id="data-table">
+  <template>
+    <style>
+      :host {
+        display:block;
+        overflow: auto;
+      }
+    </style>
+
+    <table>
+      <thead>
+        <tr>
+          <th>
+              <paper-checkbox on-click="toggleAllRow"></paper-checkbox>
+          </th>
+          <template is="dom-repeat" items="[[headers]]" as="header">
+            <th>[[header]]</th>
+          </template>
+        </tr>
+      </thead>
+      <tbody>
+        <template is="dom-repeat" items="[[rows]]" as="row">
+          <tr on-click="selectRow">
+            <td>
+              <paper-checkbox></paper-checkbox>
+            </td>
+            <template is="dom-repeat" items="[[row]]" as="cell">
+              <td>{{cell}}</td>
+            </template>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+
+
+  </template>
+  <script>
+  Polymer({
+    is: 'data-table',
+    properties: {
+      headers: {
+        type: Object
+      },
+      rows: {
+        type: Array
+      }
+    },
+    ready: function () {
+      console.log('data-table ready');
+    },
+    selectRow: function ( e ) {
+      var tagName = e.target.tagName.toLowerCase();
+      if ( 'td' === tagName ) {
+        var checkbox = e.target.parentNode.querySelector( 'paper-checkbox' );
+        checkbox.checked = !checkbox.checked;
+      } else if ( 'tr' === tagName ) {
+        var checkbox = e.target.querySelector( 'paper-checkbox' );
+        checkbox.checked = !checkbox.checked;
+      }
+    },
+    toggleAllRow: function (e) {
+      var checked = e.target.checked;
+      Polymer.dom( this.root ).querySelectorAll( 'paper-checkbox' ).forEach( function (checkbox) {
+        checkbox.checked = checked;
+      });
+    }
+  });
+  </script>
+</dom-module>

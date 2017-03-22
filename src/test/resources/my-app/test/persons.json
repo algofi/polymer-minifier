@@ -1,0 +1,8 @@
+{
+  "headers": [ "Nom", "Prénom", "Age", "Profession" ],
+  "rows": [
+    ["Jechoux", "Corentin", 37, "Consultant"],
+    ["Wayne", "John", 99, "Cowboy"],
+    ["Chaplin", "Charlie", 99, "Clown"]
+  ]
+}
