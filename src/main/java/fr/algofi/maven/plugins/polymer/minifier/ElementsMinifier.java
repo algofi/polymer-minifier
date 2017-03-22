@@ -320,7 +320,7 @@ public class ElementsMinifier {
 			LOGGER.info("Appending file: " + component.getPath());
 
 			builder.append("<!--");
-			builder.append(component.getPath());
+			builder.append(component.getPath().replace('\\', '/'));
 			builder.append("-->");
 
 			String minifiedContent = MinifierUtils.removeLinkImport(component.getMinifiedContent());

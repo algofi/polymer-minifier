@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
@@ -46,8 +47,7 @@ public class ElementsMinifierTest {
 				"elements.build.html");
 		final String expectedContent = Files.readAllLines(expectedContentPath).stream()
 				.collect(Collectors.joining("\n"));
-		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "build",
-				"index.html");
+		final Path expectedIndexPath = Paths.get("src", "test", "resources", "minifier-all", "build", "index.html");
 		final String expectedIndex = Files.readAllLines(expectedIndexPath).stream().collect(Collectors.joining("\n"));
 
 		// input
