@@ -9,3 +9,10 @@ cache:
 # Skip the "installation" step:
 # https://docs.travis-ci.com/user/customizing-the-build#Skipping-the-Installation-Step
 install: true
+
+addons:
+  sonarqube:
+    organization: "algofi"
+
+script:
+  - sonar-scanner
