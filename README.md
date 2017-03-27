@@ -1,7 +1,11 @@
 <a href="https://travis-ci.org/algofi/polymer-minimizer" title="Latest push build on default branch: " target="_polymer-minimizer-build-ci">
             <img src="https://travis-ci.org/algofi/polymer-minimizer.svg?branch=master" alt="build:">
           </a>
-[![Build status](https://travis-ci.org/algofi/polymer-minimizer.svg?branch=master)](https://travis-ci.org/algofi/polymer-minimizer) [![Quality Gate](https://sonarqube.com/api/badges/gate?key=fr.algofi.maven.plugins.polymer-minifier)](https://sonarqube.com/dashboard?id=fr.algofi.maven.plugins.polymer-minifier)
+
+<a href="https://sonarqube.com/api/badges/gate?key=fr.algofi.maven.plugins.polymer-minifier" title="Polymer Miminizer Quality Portal (SonarQube)" target="_polymer-minimizer-sonarqube">
+<img src="https://sonarqube.com/api/badges/gate?key=fr.algofi.maven.plugins.polymer-minifier" alt="Quality Gate">
+</a>
+
 
 This maven-plugin build a set of polymer elements into a single file and **minifying** each of them.
 
