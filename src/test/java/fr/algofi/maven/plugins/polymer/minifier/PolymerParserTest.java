@@ -8,29 +8,25 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 
-public class PolymerParsedTest {
+public class PolymerParserTest {
 
 	private PolymerParser sut;
 
 	@Before
 	public void setup() throws PolymerParserException {
-		final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("nashorn");
-		sut = new PolymerParser(scriptEngine);
+		// final ScriptEngine scriptEngine = new
+		// ScriptEngineManager().getEngineByName("nashorn");
+		sut = new PolymerParser();
 	}
 
 	@Test
-	public void shouldReturnAnEmptyListWhenPolymerElementHasNoProperties()
-			throws ScriptException, PolymerParserException {
+	public void shouldReturnAnEmptyListWhenPolymerElementHasNoProperties() throws PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-no-properties.html";
 		// call
@@ -42,8 +38,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAListWith1PropertyWhenPolymerElementHasOneProperty()
-			throws ScriptException, PolymerParserException {
+	public void shouldReturnAListWith1PropertyWhenPolymerElementHasOneProperty() throws PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-one-properties.html";
 		// call
@@ -59,8 +54,23 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAListWith5PropertyWhenPolymerElementHasFiveProperty()
-			throws ScriptException, PolymerParserException {
+	public void shouldReturnAListWith1FilePropertyWhenPolymerElementHasOneProperty() throws PolymerParserException {
+		// input
+		final String path = "src/test/resources/extractor/x-one-file-properties.html";
+		// call
+		final PolymerComponent polymer = sut.read(path);
+		// assertions
+		assertNotNull(polymer.getProperties());
+		assertFalse(polymer.getProperties().isEmpty());
+
+		assertEquals(1, polymer.getProperties().size());
+		assertEquals("file", polymer.getProperties().get("file").getName());
+
+		assertEquals("x-one-file-properties", polymer.getName());
+	}
+
+	@Test
+	public void shouldReturnAListWith5PropertyWhenPolymerElementHasFiveProperty() throws PolymerParserException {
 		// input
 		final String path = "src/test/resources/extractor/x-five-properties.html";
 		// call
@@ -79,8 +89,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnAnSingleListOfImportsDependenciesWhenOnlyPolymerImport()
-			throws ScriptException, PolymerParserException {
+	public void shouldReturnAnSingleListOfImportsDependenciesWhenOnlyPolymerImport() throws PolymerParserException {
 		// input
 		final String path = "src/test/resources/minifier-all/source/x-premier.html";
 		// call
@@ -92,8 +101,7 @@ public class PolymerParsedTest {
 	}
 
 	@Test
-	public void shouldReturnTheGoodImportsDependenciesWhenSomeProvided()
-			throws ScriptException, PolymerParserException {
+	public void shouldReturnTheGoodImportsDependenciesWhenSomeProvided() throws PolymerParserException {
 		// input
 		final String path = "src/test/resources/minifier-all/source/x-main.html";
 		// call
@@ -125,5 +133,4 @@ public class PolymerParsedTest {
 				myCustomBehavior.getPath());
 		assertNull(myCustomBehavior.getName());
 	}
-
 }

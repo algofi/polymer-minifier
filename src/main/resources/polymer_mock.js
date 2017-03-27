@@ -1,3 +1,4 @@
+function File() {}
 
 function Polymer( o ) { 
 	return o.properties; 

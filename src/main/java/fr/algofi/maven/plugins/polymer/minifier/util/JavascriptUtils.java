@@ -14,7 +14,7 @@ import com.google.javascript.rhino.Token;
 import fr.algofi.maven.plugins.polymer.minifier.PolymerParser;
 
 public class JavascriptUtils {
-	
+
 	private static final Logger LOGGER = LogManager.getLogger(PolymerParser.class);
 
 	private JavascriptUtils() {
@@ -51,9 +51,49 @@ public class JavascriptUtils {
 	 * @return found nodes or empty list
 	 */
 	public static List<Node> find(final Node parentNode, final Token token, final String expression) {
+		return find(parentNode, token, expression, Integer.MAX_VALUE, 0);
+	}
+
+	/**
+	 * Returns a list of node (child node of the parent node) that match the
+	 * given <tt>token</tt> and whose <tt>string</tt> match the given expression
+	 * 
+	 * @param parentNode
+	 *            starting point for the search
+	 * @param token
+	 *            type of the node to fetch
+	 * @param expression
+	 *            matching <tt>string</tt>
+	 * @param maxdepth
+	 *            max depth search
+	 * @return found nodes or empty list
+	 */
+	public static List<Node> find(final Node parentNode, final Token token, final String expression,
+			final int maxdepth) {
+		return find(parentNode, token, expression, maxdepth, 0);
+	}
+
+	/**
+	 * Returns a list of node (child node of the parent node) that match the
+	 * given <tt>token</tt> and whose <tt>string</tt> match the given expression
+	 * 
+	 * @param parentNode
+	 *            starting point for the search
+	 * @param token
+	 *            type of the node to fetch
+	 * @param expression
+	 *            matching <tt>string</tt>
+	 * @param maxdepth
+	 *            max depth search
+	 * @param currentDepth
+	 *            current depth of the search
+	 * @return found nodes or empty list
+	 */
+	private static List<Node> find(final Node parentNode, final Token token, final String expression,
+			final int maxdepth, int currentDepth) {
 		final List<Node> nodes = new ArrayList<>();
 
-		if (parentNode != null) {
+		if (parentNode != null && currentDepth <= maxdepth) {
 
 			// check this node
 			if (parentNode.getToken() == token) {
@@ -63,9 +103,9 @@ public class JavascriptUtils {
 			}
 
 			// check the 1st child
-			nodes.addAll(find(parentNode.getFirstChild(), token, expression));
+			nodes.addAll(find(parentNode.getFirstChild(), token, expression, maxdepth, currentDepth + 1));
 			// check next node
-			nodes.addAll(find(parentNode.getNext(), token, expression));
+			nodes.addAll(find(parentNode.getNext(), token, expression, maxdepth, currentDepth + 1));
 		}
 
 		return nodes;

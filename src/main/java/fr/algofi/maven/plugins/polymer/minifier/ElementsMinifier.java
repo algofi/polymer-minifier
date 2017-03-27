@@ -49,7 +49,6 @@ public class ElementsMinifier {
 	private Path importPath;
 	private String importHref;
 	private String buildHref;
-	// private String importHtml;
 
 	private Minifier dependenciesMinifier;
 
@@ -57,13 +56,7 @@ public class ElementsMinifier {
 
 		polymerMinifier = new PolymerMinifier(minifier, minifiers);
 
-		final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-		final ScriptEngine scriptEngine = scriptEngineManager.getEngineByName("nashorn");
-		try {
-			parser = new PolymerParser(scriptEngine);
-		} catch (PolymerParserException e) {
-			throw new MinifierException("Fail to initialize the polymer parser", e);
-		}
+		parser = new PolymerParser();
 
 		final MiniNameProvider provider = new MiniNameProvider();
 		final List<String> componentNames = provider.provide().stream()

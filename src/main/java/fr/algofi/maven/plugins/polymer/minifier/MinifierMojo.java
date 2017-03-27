@@ -17,6 +17,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptCompilerMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
@@ -46,6 +47,9 @@ public class MinifierMojo extends AbstractMojo {
 
 	@Parameter(name = "whiteOnlyJavascript", defaultValue = "true")
 	private boolean whiteOnlyJavascript;
+	
+	@Parameter(name = "compileJavascript", defaultValue = "true")
+	private boolean compileJavascript;
 
 	@Parameter(name = "gzipElements", defaultValue = "true")
 	private boolean gzipElements;
@@ -116,6 +120,8 @@ public class MinifierMojo extends AbstractMojo {
 		}
 		if ( whiteOnlyJavascript ) {
 			minifiers.add(new WhiteOnlyJavascriptMinifier());
+		} else if ( compileJavascript ) {
+			minifiers.add(new JavascriptCompilerMinifier());
 		}
 
 		if (writeSingleFile) {
