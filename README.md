@@ -2,7 +2,7 @@
             <img src="https://travis-ci.org/algofi/polymer-minimizer.svg?branch=master" alt="build:">
           </a>
 
-<a href="https://sonarqube.com/api/badges/gate?key=fr.algofi.maven.plugins.polymer-minifier" title="Polymer Miminizer Quality Portal (SonarQube)" target="_polymer-minimizer-sonarqube">
+<a href="https://sonarqube.com/dashboard?id=fr.algofi.maven.plugins.polymer-minifier" title="Polymer Miminizer Quality Portal (SonarQube)" target="_polymer-minimizer-sonarqube">
 <img src="https://sonarqube.com/api/badges/gate?key=fr.algofi.maven.plugins.polymer-minifier" alt="Quality Gate">
 </a>
 
