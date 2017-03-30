@@ -21,7 +21,7 @@ public class MinifierMojoIntegrationTest {
 		setFieldValue(sut, "minifyHtmlComments", Boolean.TRUE);
 		setFieldValue(sut, "minifyProperties", Boolean.TRUE);
 		setFieldValue(sut, "minifyPolymerName", Boolean.TRUE);
-		setFieldValue(sut, "minifyJavascript", Boolean.FALSE);
+		setFieldValue(sut, "minifyJavascript", Boolean.TRUE);
 		
 		setFieldValue(sut, "whiteOnlyJavascript", Boolean.FALSE);
 		setFieldValue(sut, "compileJavascript", Boolean.TRUE);

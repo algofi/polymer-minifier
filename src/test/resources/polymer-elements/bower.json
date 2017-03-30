@@ -1,0 +1,26 @@
+{
+  "name": "polymer-elements",
+  "homepage": "https://github.com/algofi/polymer-minimizer",
+  "authors": [
+    "Corentin Jechoux (Administrateur) <cjechoux@algofi.fr>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "iron-elements": "^1.0.10",
+    "paper-elements": "^1.0.7",
+    "gold-elements": "^1.0.1",
+    "neon-elements": "^1.0.0",
+    "platinum-elements": "^2.0.0",
+    "app-elements": "^0.10.1"
+  }
+}

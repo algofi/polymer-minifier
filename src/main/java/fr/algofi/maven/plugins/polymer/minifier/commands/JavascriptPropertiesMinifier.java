@@ -66,7 +66,8 @@ public class JavascriptPropertiesMinifier implements Minifier {
 	public void minimize(PolymerComponent component, final Collection<PolymerComponent> dependencies)
 			throws MinifierException {
 
-
+		LOGGER.info("Minifying JS properties for " + component.getPath() );
+		
 		String minifiedContent = component.getMinifiedContent();
 		final Document document = Jsoup.parse(minifiedContent);
 		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
@@ -109,9 +110,36 @@ public class JavascriptPropertiesMinifier implements Minifier {
 			PolymerComponent dependency) {
 		// change createElement( 'my-custom-element' )
 		// to createElement( 'x-k' )
-		elementTagNode.setString(dependency.getMiniName());
+		if (dependency.getMiniName() != null) {
+			elementTagNode.setString(dependency.getMiniName());
+		}
+		/*
+		 * if the dependency has no properties we don't need to find the
+		 * variable that is bound to `document.createElement`
+		 */
+		if (!dependency.getProperties().isEmpty()) {
+			minifyCreatedElementProperties(createElementNode, dependency);
+		}
+	}
+
+	/**
+	 * if the dependency has properties, then we retrieve the variable bound to
+	 * `document.createElement` and minify all variable bindings
+	 * 
+	 * @param createElementNode
+	 * @param dependency
+	 */
+	private void minifyCreatedElementProperties(final Node createElementNode, PolymerComponent dependency) {
 		// variable name assigned with the created Element
-		final String variableName = createElementNode.getGrandparent().getParent().getString();
+		final Node variableNameNode = createElementNode.getGrandparent().getParent();
+		/*
+		 * if the `document.createElement` is not assigned to a variable
+		 */
+		if (!variableNameNode.getToken().equals(Token.NAME)) {
+			return;
+		}
+
+		final String variableName = variableNameNode.getString();
 
 		// get the function scope where this variable where created
 		final Node functionNode = findFunction(createElementNode);

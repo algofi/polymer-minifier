@@ -24,10 +24,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.javascript.jscomp.Compiler;
+import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.SourceFile;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.Token;
 
+import fr.algofi.maven.plugins.polymer.minifier.model.JavascriptParsingException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
@@ -141,7 +143,8 @@ public class PolymerParser {
 		return null;
 	}
 
-	private Map<String, PolymerProperty> extractPolymerProperties(final String path, String script) throws PolymerParserException {
+	private Map<String, PolymerProperty> extractPolymerProperties(final String path, String script)
+			throws PolymerParserException {
 		final Map<String, PolymerProperty> properties = new HashMap<>();
 
 		final Compiler compiler = new Compiler();
@@ -149,13 +152,13 @@ public class PolymerParser {
 		final Node root = compiler.parse(sourceFile);
 		// showNode("root", root, 0);
 
-		final List <Node> polymerNodes = find(root, Token.NAME, "Polymer", 3);
+//		checkJavascriptErrors(compiler);
+
+		final List<Node> polymerNodes = find(root, Token.NAME, "Polymer", 3);
 		// assertEquals(1, polymerNodes.size());
 		if (polymerNodes.isEmpty()) {
 			return properties;
 		}
-
-		// FIXME show errors...
 
 		final List<Node> propertiesNodes = find(polymerNodes.get(0), Token.STRING_KEY, "properties");
 		// assertEquals(1, propertiesNodes.size());
@@ -167,7 +170,6 @@ public class PolymerParser {
 
 		final Node propertiesNode = propertiesNodes.get(0);
 
-		System.out.println("Properties found");
 		final List<Node> propertiesStringKeyChildsNextsNodes = find(propertiesNode, Token.STRING_KEY, 2);
 
 		final List<PolymerProperty> propertiesList = propertiesStringKeyChildsNextsNodes.stream()
@@ -186,6 +188,15 @@ public class PolymerParser {
 		return properties;
 
 	}
+
+	// TODO conditional throw
+//	private void checkJavascriptErrors(final Compiler compiler) throws JavascriptParsingException {
+//		final JSError[] errors = compiler.getErrors();
+//
+//		if (errors.length > 0) {
+//			throw new JavascriptParsingException("Cannot parse the Javascript file", errors);
+//		}
+//	}
 
 	private static String readContent(final String path) throws IOException {
 

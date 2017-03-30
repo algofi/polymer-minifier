@@ -7,9 +7,4 @@ public class PolymerParserException extends Exception {
 	public PolymerParserException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
-	public PolymerParserException(String message) {
-		super(message);
-	}
-
 }
