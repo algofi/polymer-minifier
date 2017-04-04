@@ -1,8 +1,5 @@
 package fr.algofi.maven.plugins.polymer.minifier.commands;
 
-import static fr.algofi.maven.plugins.polymer.minifier.util.JavascriptUtils.find;
-import static fr.algofi.maven.plugins.polymer.minifier.util.JavascriptUtils.findFunction;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +18,9 @@ import com.google.javascript.jscomp.CompilerOptions.Environment;
 import com.google.javascript.jscomp.CompilerOptions.LanguageMode;
 import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.SourceFile;
-import com.google.javascript.rhino.Node;
-import com.google.javascript.rhino.Token;
 
 import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
-import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
 import fr.algofi.maven.plugins.polymer.minifier.model.ScriptPart;
 import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
 
@@ -75,8 +69,6 @@ public class JavascriptCompilerMinifier implements Minifier {
 
 		try {
 
-
-
 			final CompilerOptions options = configureCompiler();
 
 			final Environment env = options.getEnvironment();
@@ -87,7 +79,6 @@ public class JavascriptCompilerMinifier implements Minifier {
 			final ScriptPart scriptPart = getInitialScript(component);
 			final SourceFile src = SourceFile.fromCode(path, scriptPart.getBulkScript());
 			inputs.add(src);
-
 
 			final Compiler compiler = new Compiler();
 			compiler.compile(externs, inputs, options);
@@ -101,21 +92,21 @@ public class JavascriptCompilerMinifier implements Minifier {
 				component.setMiniContent(minifiedContent);
 			} else {
 
-//				if (component.getPath().contains("bower_componentFAKE")) {
-//					for (JSError compilerError : compilerErrors) {
-//						LOGGER.warn(compilerError.toString());
-//					}
-//				} else {
-					final StringBuilder compilerErrorBuilder = new StringBuilder();
-					for (JSError compilerError : compilerErrors) {
-						compilerErrorBuilder.append(compilerError.toString()).append("\n");
-					}
-					throw new MinifierException("Cannot optimize " + component.getPath()
-							+ " because errors were found:\n" + compilerErrorBuilder.toString());
-//				}
+				// if (component.getPath().contains("bower_componentFAKE")) {
+				// for (JSError compilerError : compilerErrors) {
+				// LOGGER.warn(compilerError.toString());
+				// }
+				// } else {
+				final StringBuilder compilerErrorBuilder = new StringBuilder();
+				for (JSError compilerError : compilerErrors) {
+					compilerErrorBuilder.append(compilerError.toString()).append("\n");
+				}
+				throw new MinifierException("Cannot optimize " + component.getPath() + " because errors were found:\n"
+						+ compilerErrorBuilder.toString());
+				// }
 			}
 		} catch (IOException e) {
-
+			throw new MinifierException("Cannot minimize the script " + component.getPath(), e);
 		}
 	}
 
@@ -133,7 +124,7 @@ public class JavascriptCompilerMinifier implements Minifier {
 	private CompilerOptions configureCompiler() {
 		final CompilerOptions options = new CompilerOptions();
 		CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
-//		CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
+		// CompilationLevel.ADVANCED_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
 		options.setContinueAfterErrors(true);
 		options.setLanguageIn(LanguageMode.ECMASCRIPT_2015);
 		options.setStrictModeInput(false);
@@ -142,7 +133,5 @@ public class JavascriptCompilerMinifier implements Minifier {
 		// options.setWarningLevel(type, CheckLevel.OFF);
 		return options;
 	}
-
-	
 
 }

@@ -18,7 +18,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptCompilerMinifier;
-import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptPropertiesMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
@@ -32,9 +31,8 @@ import fr.algofi.maven.plugins.polymer.minifier.util.FilesUtils;
 
 @Mojo(name = "minify")
 public class MinifierMojo extends AbstractMojo {
-	
-	private static final Logger LOGGER = LogManager.getLogger(MinifierMojo.class);
 
+	private static final Logger LOGGER = LogManager.getLogger(MinifierMojo.class);
 
 	@Parameter(name = "index", required = true)
 	private String index;
@@ -47,7 +45,7 @@ public class MinifierMojo extends AbstractMojo {
 
 	@Parameter(name = "whiteOnlyJavascript", defaultValue = "true")
 	private boolean whiteOnlyJavascript;
-	
+
 	@Parameter(name = "compileJavascript", defaultValue = "true")
 	private boolean compileJavascript;
 
@@ -79,9 +77,9 @@ public class MinifierMojo extends AbstractMojo {
 			final MiniElements mini = minifier.minimize(indexPath);
 
 			createTargetFolder();
-			
+
 			// todo standard index
-			
+
 			FilesUtils.write(Paths.get(outputFolder, "index.build.html"), mini.getBuildIndexContent());
 			FilesUtils.write(Paths.get(outputFolder, "index.html"), mini.getMiniIndexContent());
 			FilesUtils.write(Paths.get(outputFolder, mini.getBuildFileName()), mini.getBuilldContent());
@@ -93,7 +91,7 @@ public class MinifierMojo extends AbstractMojo {
 			}
 
 		} catch (IOException | MinifierException e) {
-			LOGGER.error( e );
+			LOGGER.error(e);
 			throw new MojoFailureException("Cannot build the polymer project", e);
 		}
 	}
@@ -116,11 +114,11 @@ public class MinifierMojo extends AbstractMojo {
 		}
 		if (minifyJavascript) {
 			minifiers.add(new JavascriptPropertiesMinifier());
-//			minifiers.add(new JavascriptMinifier());
+			// minifiers.add(new JavascriptMinifier());
 		}
-		if ( whiteOnlyJavascript ) {
+		if (whiteOnlyJavascript) {
 			minifiers.add(new WhiteOnlyJavascriptMinifier());
-		} else if ( compileJavascript ) {
+		} else if (compileJavascript) {
 			minifiers.add(new JavascriptCompilerMinifier());
 		}
 

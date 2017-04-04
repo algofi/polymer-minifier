@@ -19,9 +19,12 @@ public class PolymerMinifier {
 	// private Collection<PolymerComponent> dependencies = new ArrayList<>();
 	private final List<Minifier> minifiers;
 
+	private Minifier firstMinifier;
+
 	public PolymerMinifier(Minifier minifier, Minifier... minifiers) {
+		this.firstMinifier = minifier;
+
 		this.minifiers = new ArrayList<>();
-		this.minifiers.add(minifier);
 		if (minifiers != null) {
 			this.minifiers.addAll(Arrays.asList(minifiers));
 		}
@@ -41,6 +44,9 @@ public class PolymerMinifier {
 			throws MinifierException {
 
 		LOGGER.info("Minimizing: " + polymer.getPath());
+
+		firstMinifier.minimize(polymer, dependencies);
+
 		for (Minifier minifier : minifiers) {
 			minifier.minimize(polymer, dependencies);
 		}

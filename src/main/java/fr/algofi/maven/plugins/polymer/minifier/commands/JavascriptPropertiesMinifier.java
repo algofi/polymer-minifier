@@ -3,6 +3,7 @@ package fr.algofi.maven.plugins.polymer.minifier.commands;
 import static fr.algofi.maven.plugins.polymer.minifier.util.JavascriptUtils.find;
 import static fr.algofi.maven.plugins.polymer.minifier.util.JavascriptUtils.findFunction;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -11,7 +12,11 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.google.javascript.jscomp.AbstractCommandLineRunner;
 import com.google.javascript.jscomp.Compiler;
+import com.google.javascript.jscomp.CompilerOptions;
+import com.google.javascript.jscomp.CompilerOptions.Environment;
+import com.google.javascript.jscomp.CompilerOptions.LanguageMode;
 import com.google.javascript.jscomp.SourceFile;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.Token;
@@ -66,28 +71,40 @@ public class JavascriptPropertiesMinifier implements Minifier {
 	public void minimize(PolymerComponent component, final Collection<PolymerComponent> dependencies)
 			throws MinifierException {
 
-		LOGGER.info("Minifying JS properties for " + component.getPath() );
+		try {
+			LOGGER.info("Minifying JS properties for " + component.getPath() );
+			
+			final ScriptPart scriptPart = getInitialScript(component);
+	
+			final String path = component.getPath();
+			final Compiler compiler = new Compiler();
+			
+			final CompilerOptions options = configureCompiler();
+
+			final Environment env = options.getEnvironment();
+			final List<SourceFile> externs = AbstractCommandLineRunner.getBuiltinExterns(env);
+
+			final SourceFile src = SourceFile.fromCode(path, scriptPart.getBulkScript());
+	
+			compiler.initOptions(options);
+			
+			final Node root = compiler.parse(src);
+			final List<Node> createElementNodes = find(root, Token.STRING, "createElement");
+	
+			for (Node createElementNode : createElementNodes) {
+				minifyCreatedElements(createElementNode, dependencies);
+			}
+	
+			JavascriptUtils.showNode("ROOT", root, 0);
+	
+			String minifiedContent  = component.getMinifiedContent();
+			minifiedContent = minifiedContent.replace(scriptPart.getBulkScript(), compiler.toSource(root));
+	
+			component.setMiniContent(minifiedContent);
 		
-		String minifiedContent = component.getMinifiedContent();
-		final Document document = Jsoup.parse(minifiedContent);
-		final ScriptPart scriptPart = MinifierUtils.extractScript(document);
-
-		final String path = component.getPath();
-		final Compiler compiler = new Compiler();
-		final SourceFile src = SourceFile.fromCode(path, scriptPart.getBulkScript());
-
-		final Node root = compiler.parse(src);
-		final List<Node> createElementNodes = find(root, Token.STRING, "createElement");
-
-		for (Node createElementNode : createElementNodes) {
-			minifyCreatedElements(createElementNode, dependencies);
+		} catch( IOException e) {
+			throw new MinifierException("Cannot minimize the script " + component.getPath(), e);
 		}
-
-		JavascriptUtils.showNode("ROOT", root, 0);
-
-		minifiedContent = minifiedContent.replace(scriptPart.getBulkScript(), compiler.toSource(root));
-
-		component.setMiniContent(minifiedContent);
 
 	}
 
@@ -161,6 +178,31 @@ public class JavascriptPropertiesMinifier implements Minifier {
 
 			}
 		}
+	}
+	
+	private ScriptPart getInitialScript(final PolymerComponent component) {
+		final String minifiedContent = component.getMinifiedContent();
+		final Document document = Jsoup.parse(minifiedContent);
+		return MinifierUtils.extractScript(document);
+	}
+
+	/**
+	 * build the option object for the closure compiler
+	 * 
+	 * @return
+	 */
+	private CompilerOptions configureCompiler() {
+		final CompilerOptions options = new CompilerOptions();
+
+		// NO OPTIMIZATION
+		
+		options.setContinueAfterErrors(true);
+		options.setLanguageIn(LanguageMode.ECMASCRIPT_2015);
+		options.setStrictModeInput(false);
+		options.setLanguageOut(LanguageMode.ECMASCRIPT5);
+		options.setExternExports(true);
+		// options.setWarningLevel(type, CheckLevel.OFF);
+		return options;
 	}
 
 }
