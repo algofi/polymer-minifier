@@ -72,37 +72,37 @@ public class JavascriptPropertiesMinifier implements Minifier {
 			throws MinifierException {
 
 		try {
-			LOGGER.info("Minifying JS properties for " + component.getPath() );
-			
+			LOGGER.info("Minifying JS properties for " + component.getPath());
+
 			final ScriptPart scriptPart = getInitialScript(component);
-	
+
 			final String path = component.getPath();
 			final Compiler compiler = new Compiler();
-			
+
 			final CompilerOptions options = configureCompiler();
 
 			final Environment env = options.getEnvironment();
 			final List<SourceFile> externs = AbstractCommandLineRunner.getBuiltinExterns(env);
 
 			final SourceFile src = SourceFile.fromCode(path, scriptPart.getBulkScript());
-	
+
 			compiler.initOptions(options);
-			
+
 			final Node root = compiler.parse(src);
 			final List<Node> createElementNodes = find(root, Token.STRING, "createElement");
-	
+
 			for (Node createElementNode : createElementNodes) {
 				minifyCreatedElements(createElementNode, dependencies);
 			}
-	
+
 			JavascriptUtils.showNode("ROOT", root, 0);
-	
-			String minifiedContent  = component.getMinifiedContent();
+
+			String minifiedContent = component.getMinifiedContent();
 			minifiedContent = minifiedContent.replace(scriptPart.getBulkScript(), compiler.toSource(root));
-	
+
 			component.setMiniContent(minifiedContent);
-		
-		} catch( IOException e) {
+
+		} catch (IOException e) {
 			throw new MinifierException("Cannot minimize the script " + component.getPath(), e);
 		}
 
@@ -111,13 +111,15 @@ public class JavascriptPropertiesMinifier implements Minifier {
 	private void minifyCreatedElements(final Node createElementNode, final Collection<PolymerComponent> dependencies) {
 
 		final Node elementTagNode = createElementNode.getParent().getNext();
-		final String originalComponentName = elementTagNode.getString();
+		if (Token.STRING.equals(elementTagNode.getToken())) {
+			final String originalComponentName = elementTagNode.getString();
 
-		for (PolymerComponent dependency : dependencies) {
+			for (PolymerComponent dependency : dependencies) {
 
-			if (originalComponentName.equals(dependency.getName())) {
+				if (originalComponentName.equals(dependency.getName())) {
 
-				minifyCreatedElement(createElementNode, elementTagNode, dependency);
+					minifyCreatedElement(createElementNode, elementTagNode, dependency);
+				}
 			}
 		}
 
@@ -179,7 +181,7 @@ public class JavascriptPropertiesMinifier implements Minifier {
 			}
 		}
 	}
-	
+
 	private ScriptPart getInitialScript(final PolymerComponent component) {
 		final String minifiedContent = component.getMinifiedContent();
 		final Document document = Jsoup.parse(minifiedContent);
@@ -195,7 +197,7 @@ public class JavascriptPropertiesMinifier implements Minifier {
 		final CompilerOptions options = new CompilerOptions();
 
 		// NO OPTIMIZATION
-		
+
 		options.setContinueAfterErrors(true);
 		options.setLanguageIn(LanguageMode.ECMASCRIPT_2015);
 		options.setStrictModeInput(false);
