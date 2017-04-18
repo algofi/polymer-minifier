@@ -1,4 +1,4 @@
-package compiler;
+package compiler.js;
 
 import static com.google.javascript.jscomp.SourceFile.fromCode;
 import static com.google.javascript.jscomp.SourceFile.fromInputStream;

@@ -4,7 +4,7 @@
 
 	<groupId>fr.algofi.maven.plugins</groupId>
 	<artifactId>polymer-minifier</artifactId>
-	<version>2.3.2</version>
+	<version>3.0-SNAPSHOT</version>
 
 	<name>Minify Polymer</name>
 	<description>Plugin to minify a polymer plugin</description>
@@ -88,6 +88,13 @@
 			<version>9.4.2.v20170220</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.yahoo.platform.yui</groupId>
+			<artifactId>yuicompressor</artifactId>
+			<version>2.4.8</version>
+		</dependency>
+
 
 	</dependencies>
 
