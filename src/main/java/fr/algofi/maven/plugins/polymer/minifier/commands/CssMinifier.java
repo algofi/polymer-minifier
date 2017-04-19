@@ -19,12 +19,8 @@ import fr.algofi.maven.plugins.polymer.minifier.model.MinifierException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 
 public class CssMinifier implements Minifier {
-
-	private final boolean compileCss;
-
-	public CssMinifier(final boolean compileCss) {
-		this.compileCss = compileCss;
-	}
+	
+	private static final String STYLE_END_TAG = "</style>";
 
 	@Override
 	public void minimize(PolymerComponent component, Collection<PolymerComponent> dependencies)
@@ -38,7 +34,7 @@ public class CssMinifier implements Minifier {
 		for (Style style : styles) {
 			if (style.bulkCss.trim().length() == 0) {
 				minifiedContent = minifiedContent.replaceFirst(style.outerHtml, "");
-			} else if (compileCss) {
+			} else {
 
 				final String compiledCss = compileCss(component, style.bulkCss);
 
@@ -46,7 +42,7 @@ public class CssMinifier implements Minifier {
 				if (compiledCss.trim().length() == 0) {
 					compiledStyle = "";
 				} else {
-					compiledStyle = style.startTag + compiledCss + style.endTag;
+					compiledStyle = style.startTag + compiledCss + STYLE_END_TAG;
 				}
 				minifiedContent = minifiedContent.replace(style.outerHtml, compiledStyle);
 			}
@@ -102,7 +98,6 @@ public class CssMinifier implements Minifier {
 	private class Style {
 
 		public String startTag;
-		public static final String endTag = "</style>";
 
 		public String bulkCss;
 		public String outerHtml;

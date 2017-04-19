@@ -16,6 +16,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.CssMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.HTMLCommentMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptCompilerMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.JavascriptPropertiesMinifier;
@@ -67,6 +68,12 @@ public class MinifierMojo extends AbstractMojo {
 	@Parameter(name = "writeSingleFile", defaultValue = "true")
 	private boolean writeSingleFile;
 
+	/**
+	 * minify CSS styles includes inside an HTML
+	 */
+	@Parameter(name = "minifyStyles", defaultValue = "true")
+	private boolean minifyStyles;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
@@ -103,6 +110,11 @@ public class MinifierMojo extends AbstractMojo {
 		if (minifyBlanks) {
 			minifiers.add(new BlankMinifier());
 		}
+
+		if (minifyStyles) {
+			minifiers.add(new CssMinifier());
+		}
+
 		if (minifyHtmlComments) {
 			minifiers.add(new HTMLCommentMinifier());
 		}

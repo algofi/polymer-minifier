@@ -36,32 +36,13 @@ public class CssMinifierTest {
 		component.setMiniContent(component.getContent());
 
 		// call
-		sut = new CssMinifier( false );
+		sut = new CssMinifier( );
 		sut.minimize(component, Arrays.asList(component));
 
 		// assertions
 		assertEquals(component.getContent(), component.getMinifiedContent());
 	}
 	
-	@Test
-	public void shouldRemoveEmptyStyles() throws PolymerParserException, MinifierException, IOException {
-		// input
-		final Path path = Paths.get("src", "test", "resources", "css", "x-page-empty-style.html");
-		final PolymerComponent component = parser.read(path.toString());
-		// the default minified content is the original content itself
-		component.setMiniContent(component.getContent());
-		
-		// expected
-		final Path expectedPathpath = Paths.get("src", "test", "resources", "css", "x-page-empty-style_expected.html");
-		final String expectedContent = Files.readAllLines(expectedPathpath).stream().collect(Collectors.joining("\n"));
-		
-		// call
-		sut = new CssMinifier( false );
-		sut.minimize(component, Arrays.asList(component));
-		
-		// assertions
-		assertEquals(expectedContent, component.getMinifiedContent());
-	}
 
 	@Test
 	public void shouldCompileCss() throws PolymerParserException, MinifierException, IOException {
@@ -76,7 +57,7 @@ public class CssMinifierTest {
 		final String expectedContent = Files.readAllLines(expectedPathpath).stream().collect(Collectors.joining("\n"));
 		
 		// call
-		sut = new CssMinifier( true );
+		sut = new CssMinifier( );
 		sut.minimize(component, Arrays.asList(component));
 		
 		// assertions
