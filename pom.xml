@@ -4,7 +4,7 @@
 
 	<groupId>fr.algofi.maven.plugins</groupId>
 	<artifactId>polymer-minifier</artifactId>
-	<version>3.1</version>
+	<version>3.2-SNAPSHOT</version>
 
 	<name>Minify Polymer</name>
 	<description>Plugin to minify a polymer plugin</description>
