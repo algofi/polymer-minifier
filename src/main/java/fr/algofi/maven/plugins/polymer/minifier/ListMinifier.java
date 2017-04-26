@@ -25,7 +25,7 @@ public class ListMinifier implements Minifier {
 
 
 	public ListMinifier( List<Minifier> minifiers) {
-		this.minifiers = new ArrayList<>();
+		this.minifiers = minifiers;
 	}
 
 	/**

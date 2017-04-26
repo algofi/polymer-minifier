@@ -1,6 +1,7 @@
 package fr.algofi.maven.plugins.polymer.minifier;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -17,16 +18,20 @@ public class MinifierMojoIntegrationTest {
 		setFieldValue(sut, "index", "src/test/resources/my-app/index.html");
 		setFieldValue(sut, "outputFolder", "src/test/resources/my-app/target/polymer-minifier-integration-test-mini");
 		setFieldValue(sut, "gzipElements", Boolean.TRUE);
-		setFieldValue(sut, "minifyBlanks", Boolean.TRUE);
-		setFieldValue(sut, "minifyHtmlComments", Boolean.TRUE);
-		setFieldValue(sut, "minifyProperties", Boolean.TRUE);
-		setFieldValue(sut, "minifyPolymerName", Boolean.TRUE);
-		setFieldValue(sut, "minifyJavascript", Boolean.TRUE);
 		
-		setFieldValue(sut, "whiteOnlyJavascript", Boolean.FALSE);
-		setFieldValue(sut, "compileJavascript", Boolean.TRUE);
+		final Resource resource = new Resource();
+		resource.setIncludes(Arrays.asList("**/*"));
+		resource.setMinifyBlanks(true);
+		resource.setMinifyHtmlComments(true);
+		resource.setMinifyProperties(true);
+		resource.setMinifyPolymerName(true);
+		resource.setMinifyJavascript(true);
+		resource.setWhiteOnlyJavascript(false);
+		resource.setCompileJavascript(true);
+		resource.setWriteSingleFile(true);
 		
-		setFieldValue(sut, "writeSingleFile", Boolean.TRUE);
+		setFieldValue(sut, "resources", Arrays.asList(resource));
+		
 	}
 
 	private static void setFieldValue(MinifierMojo mojo, final String fieldName, final Object fieldValue)

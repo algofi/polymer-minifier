@@ -6,9 +6,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -38,7 +40,15 @@ public class PolymerProjectMinifierTest {
 		final Minifier properties = new PolymerPropertiesMinifier();
 		final Minifier polymerName = new PolymerNameMinifier();
 		// final Minifier whiteOnly = new WhiteOnlyJavascriptMinifier();
-		sut = new ListMinifier(Arrays.asList(no, blank, htmlComments, properties, polymerName));
+
+		final List<Minifier> minifiers = new ArrayList<>();
+		minifiers.add(no);
+		minifiers.add(blank);
+		minifiers.add(htmlComments);
+		minifiers.add(properties);
+		minifiers.add(polymerName);
+
+		sut = new ListMinifier(minifiers);
 	}
 
 	@Test
