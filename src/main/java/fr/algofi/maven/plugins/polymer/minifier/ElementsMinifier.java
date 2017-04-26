@@ -115,14 +115,6 @@ public class ElementsMinifier {
 		}
 	}
 
-	private String makeBuildIndexPath(Path index) {
-
-		final Path parent = index.getParent();
-		final String filename = index.toFile().getName().replace(".html", ".build.html");
-
-		return parent.resolve(filename).toString();
-	}
-
 	private void showSummary() {
 		LOGGER.debug("Summary :");
 		for (PolymerComponent component : components.values()) {
@@ -254,28 +246,6 @@ public class ElementsMinifier {
 			}
 		}
 
-		// indexDocument = Jsoup.parse(indexContent);
-		// final Elements links = indexDocument.getElementsByTag("link");
-		//
-		//
-		// for (Element link : links) {
-		// final String rel = link.attr("rel");
-		// if ("import".equals(rel)) {
-		// importHref = link.attr("href").trim();
-		// importHtml = link.outerHtml();
-		// if (parent == null) {
-		// if (importHref.startsWith("/")) {
-		// importHref = "." + importHref;
-		// }
-		// importPath = Paths.get(importHref).normalize();
-		// } else {
-		// importPath =
-		// parent.normalize().resolve(Paths.get(importHref)).normalize();
-		// }
-		// imports.add(importPath);
-		// }
-		// }
-
 		if (imports.isEmpty()) {
 			throw new MinifierException("No import tag was found");
 		} else if (imports.size() > 1) {
@@ -323,7 +293,7 @@ public class ElementsMinifier {
 	}
 
 	/**
-	 * get a map of all web components : key component path, value
+	 * get a map of all web source components : key component path, value
 	 * PolymerComponent
 	 * 
 	 * @param path
