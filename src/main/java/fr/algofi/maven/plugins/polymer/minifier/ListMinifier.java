@@ -1,7 +1,6 @@
 
 package fr.algofi.maven.plugins.polymer.minifier;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
