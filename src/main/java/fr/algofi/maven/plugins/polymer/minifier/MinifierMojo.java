@@ -3,6 +3,7 @@ package fr.algofi.maven.plugins.polymer.minifier;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import fr.algofi.maven.plugins.polymer.minifier.commands.Minifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.NoMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerNameMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.PolymerPropertiesMinifier;
+import fr.algofi.maven.plugins.polymer.minifier.commands.ResourceMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.WhiteOnlyJavascriptMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.commands.WriteSingleFileMinifier;
 import fr.algofi.maven.plugins.polymer.minifier.model.MiniElements;
@@ -41,54 +43,22 @@ public class MinifierMojo extends AbstractMojo {
 	@Parameter(name = "outputFolder", defaultValue = "target/polymer-minifier")
 	private String outputFolder;
 
-	@Parameter(name = "minifyJavascript", defaultValue = "true")
-	private boolean minifyJavascript;
-
-	@Parameter(name = "whiteOnlyJavascript", defaultValue = "true")
-	private boolean whiteOnlyJavascript;
-
-	@Parameter(name = "compileJavascript", defaultValue = "true")
-	private boolean compileJavascript;
-
 	@Parameter(name = "gzipElements", defaultValue = "true")
 	private boolean gzipElements;
 
-	@Parameter(name = "minifyBlanks", defaultValue = "true")
-	private boolean minifyBlanks;
-
-	@Parameter(name = "minifyHtmlComments", defaultValue = "true")
-	private boolean minifyHtmlComments;
-
-	@Parameter(name = "minifyProperties", defaultValue = "false")
-	private boolean minifyProperties;
-
-	@Parameter(name = "minifyPolymerName", defaultValue = "true")
-	private boolean minifyPolymerName;
-
-	@Parameter(name = "writeSingleFile", defaultValue = "true")
-	private boolean writeSingleFile;
-	
-	@Parameter( name="resources")
+	@Parameter(name = "resources")
 	private List<Resource> resources;
-
-	/**
-	 * minify CSS styles includes inside an HTML
-	 */
-	@Parameter(name = "minifyStyles", defaultValue = "true")
-	private boolean minifyStyles;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		final Path indexPath = Paths.get(index);
+		createTargetFolder();
 
 		try {
-			final ElementsMinifier minifier = createElementsMinifier();
+
+			final ElementsMinifier minifier = createElementsMinifier(resources);
 			final MiniElements mini = minifier.minimize(indexPath);
-
-			createTargetFolder();
-
-			// todo standard index
 
 			FilesUtils.write(Paths.get(outputFolder, "index.build.html"), mini.getBuildIndexContent());
 			FilesUtils.write(Paths.get(outputFolder, "index.html"), mini.getMiniIndexContent());
@@ -106,46 +76,67 @@ public class MinifierMojo extends AbstractMojo {
 		}
 	}
 
-	private ElementsMinifier createElementsMinifier() throws MinifierException {
-		final Minifier no = new NoMinifier();
+	private ElementsMinifier createElementsMinifier(List<Resource> resources) throws MinifierException {
 
-		final List<Minifier> minifiers = new ArrayList<>();
-		if (minifyBlanks) {
-			minifiers.add(new BlankMinifier());
+		final List<Minifier> elementsMinifier = new ArrayList<>();
+
+		for (Resource resource : resources) {
+
+			final Minifier no = new NoMinifier();
+
+			final List<PathMatcher> includes = new ArrayList<>(); // FIXME
+			final List<PathMatcher> excludes = new ArrayList<>(); // FIXME
+
+			final List<Minifier> minifiers = new ArrayList<>();
+			
+			minifiers.add(no);
+			
+			
+			if (resource.isMinifyBlanks()) {
+				minifiers.add(new ResourceMinifier(new BlankMinifier(), includes, excludes));
+			}
+
+			if (resource.isMinifyStyles()) {
+				minifiers.add(new ResourceMinifier(new CssMinifier(), includes, excludes));
+			}
+
+			if (resource.isMinifyHtmlComments()) {
+				minifiers.add(new ResourceMinifier(new HTMLCommentMinifier(), includes, excludes));
+			}
+			if (resource.isMinifyProperties()) {
+				minifiers.add(new ResourceMinifier(new PolymerPropertiesMinifier(), includes, excludes));
+			}
+			if (resource.isMinifyPolymerName()) {
+				minifiers.add(new ResourceMinifier(new PolymerNameMinifier(), includes, excludes));
+			}
+			if (resource.isMinifyJavascript()) {
+				minifiers.add(new ResourceMinifier(new JavascriptPropertiesMinifier(), includes, excludes));
+				// minifiers.add(new JavascriptMinifier(), includes, excludes
+				// ));
+			}
+			if (resource.isWhiteOnlyJavascript()) {
+				minifiers.add(new ResourceMinifier(new WhiteOnlyJavascriptMinifier(), includes, excludes));
+			} else if (resource.isCompileJavascript()) {
+				minifiers.add(new ResourceMinifier(new JavascriptCompilerMinifier(), includes, excludes));
+			}
+
+			if (resource.isWriteSingleFile()) {
+				final Path srcParentFolder = Paths.get(index).getParent();
+				final Path target = Paths.get(outputFolder);
+				final Minifier writeSingleFileMinifier = new WriteSingleFileMinifier(srcParentFolder, target,
+						resource.isMinifyPolymerName(), resource.isGzipElements());
+				minifiers.add(writeSingleFileMinifier);
+			}
+			
+			
+			final Minifier listMinifier = new ListMinifier(minifiers);
+			
+			elementsMinifier.add(listMinifier);
+			
 		}
 
-		if (minifyStyles) {
-			minifiers.add(new CssMinifier());
-		}
 
-		if (minifyHtmlComments) {
-			minifiers.add(new HTMLCommentMinifier());
-		}
-		if (minifyProperties) {
-			minifiers.add(new PolymerPropertiesMinifier());
-		}
-		if (minifyPolymerName) {
-			minifiers.add(new PolymerNameMinifier());
-		}
-		if (minifyJavascript) {
-			minifiers.add(new JavascriptPropertiesMinifier());
-			// minifiers.add(new JavascriptMinifier());
-		}
-		if (whiteOnlyJavascript) {
-			minifiers.add(new WhiteOnlyJavascriptMinifier());
-		} else if (compileJavascript) {
-			minifiers.add(new JavascriptCompilerMinifier());
-		}
-
-		if (writeSingleFile) {
-			final Path srcParentFolder = Paths.get(index).getParent();
-			final Path target = Paths.get(outputFolder);
-			final Minifier writeSingleFileMinifier = new WriteSingleFileMinifier(srcParentFolder, target,
-					minifyPolymerName, gzipElements);
-			minifiers.add(writeSingleFileMinifier);
-		}
-
-		final ElementsMinifier minifier = new ElementsMinifier(no, minifiers.toArray(new Minifier[minifiers.size()]));
+		final ElementsMinifier minifier = new ElementsMinifier(elementsMinifier);
 		return minifier;
 	}
 

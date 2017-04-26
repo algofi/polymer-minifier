@@ -42,7 +42,7 @@ import fr.algofi.maven.plugins.polymer.minifier.util.MinifierUtils;
  */
 public class ElementsMinifier {
 	private static final Logger LOGGER = LogManager.getLogger(ElementsMinifier.class);
-	private final PolymerMinifier polymerMinifier;
+	private final ListMinifier polymerMinifier;
 	private PolymerParser parser;
 	private Iterator<String> componentNameIterator;
 	private Map<String, PolymerComponent> components;
@@ -53,9 +53,9 @@ public class ElementsMinifier {
 
 	private Minifier dependenciesMinifier;
 
-	public ElementsMinifier(Minifier minifier, Minifier... minifiers) throws MinifierException {
+	public ElementsMinifier(List<Minifier> minifiers) throws MinifierException {
 
-		polymerMinifier = new PolymerMinifier(minifier, minifiers);
+		polymerMinifier = new ListMinifier( minifiers);
 
 		parser = new PolymerParser();
 
@@ -64,14 +64,11 @@ public class ElementsMinifier {
 				.collect(Collectors.mapping(name -> "x-" + name, Collectors.toList()));
 		componentNameIterator = componentNames.iterator();
 
-		setDependenciesMinifier(minifier, minifiers);
+		setDependenciesMinifier(minifiers);
 
 	}
 
-	private void setDependenciesMinifier(Minifier minifier, Minifier... minifiers) {
-		if (minifier instanceof DependenciesMinifier) {
-			dependenciesMinifier = minifier;
-		}
+	private void setDependenciesMinifier(List<Minifier> minifiers) {
 		for (Minifier mini : minifiers) {
 			if (mini instanceof DependenciesMinifier) {
 				dependenciesMinifier = mini;
@@ -309,7 +306,7 @@ public class ElementsMinifier {
 		for (String key : components.keySet()) {
 			final PolymerComponent component = components.get(key);
 
-			polymerMinifier.minify(component, dependencyElements);
+			polymerMinifier.minimize(component, dependencyElements);
 
 			LOGGER.info("Appending file: " + component.getPath());
 

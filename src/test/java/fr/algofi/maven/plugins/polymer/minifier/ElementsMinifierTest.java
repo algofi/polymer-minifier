@@ -1,4 +1,4 @@
-package fr.algofi.maven.plugins.polymer.minifier;
+ package fr.algofi.maven.plugins.polymer.minifier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
-import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import fr.algofi.maven.plugins.polymer.minifier.commands.BlankMinifier;
@@ -36,7 +36,7 @@ public class ElementsMinifierTest {
 		final Minifier polymerName = new PolymerNameMinifier();
 		final Minifier dep = new DependenciesMinifier();
 
-		sut = new ElementsMinifier(no, blank, htmlComments, properties, polymerName, dep);
+		sut = new ElementsMinifier(Arrays.asList(no, blank, htmlComments, properties, polymerName, dep));
 	}
 
 	@Test
