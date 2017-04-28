@@ -67,9 +67,6 @@ public class MinifierMojo extends AbstractMojo {
 
 	@Parameter(name = "writeSingleFile", defaultValue = "true")
 	private boolean writeSingleFile;
-	
-	@Parameter( name="resources")
-	private List<Resource> resources;
 
 	/**
 	 * minify CSS styles includes inside an HTML
