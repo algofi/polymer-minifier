@@ -61,7 +61,7 @@ public class PolymerComponent {
 		return miniContent;
 	}
 
-	public void setMiniContent(String miniContent) {
+	public synchronized void setMiniContent(String miniContent) {
 		this.miniContent = miniContent;
 	}
 
