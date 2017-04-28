@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +23,8 @@ public class PolymerMinifier {
 
 	private Minifier firstMinifier;
 
+	private Executor executor;
+
 	public PolymerMinifier(Minifier minifier, Minifier... minifiers) {
 		this.firstMinifier = minifier;
 
@@ -28,6 +32,8 @@ public class PolymerMinifier {
 		if (minifiers != null) {
 			this.minifiers.addAll(Arrays.asList(minifiers));
 		}
+
+		this.executor = Executors.newFixedThreadPool(10);
 	}
 
 	/**
@@ -47,7 +53,9 @@ public class PolymerMinifier {
 
 		firstMinifier.minimize(polymer, dependencies);
 
-		for (Minifier minifier : minifiers) {
+		for (final Minifier minifier : minifiers) {
+			// CompletableFuture.runAsync( () -> minifier.minimize(polymer,
+			// dependencies) ).ex;
 			minifier.minimize(polymer, dependencies);
 		}
 
