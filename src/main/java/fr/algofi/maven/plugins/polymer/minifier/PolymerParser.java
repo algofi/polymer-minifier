@@ -24,12 +24,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.javascript.jscomp.Compiler;
-import com.google.javascript.jscomp.JSError;
 import com.google.javascript.jscomp.SourceFile;
 import com.google.javascript.rhino.Node;
 import com.google.javascript.rhino.Token;
 
-import fr.algofi.maven.plugins.polymer.minifier.model.JavascriptParsingException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerComponent;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerParserException;
 import fr.algofi.maven.plugins.polymer.minifier.model.PolymerProperty;
@@ -152,7 +150,7 @@ public class PolymerParser {
 		final Node root = compiler.parse(sourceFile);
 		// showNode("root", root, 0);
 
-//		checkJavascriptErrors(compiler);
+		// checkJavascriptErrors(compiler);
 
 		final List<Node> polymerNodes = find(root, Token.NAME, "Polymer", 3);
 		// assertEquals(1, polymerNodes.size());
@@ -190,13 +188,15 @@ public class PolymerParser {
 	}
 
 	// TODO conditional throw
-//	private void checkJavascriptErrors(final Compiler compiler) throws JavascriptParsingException {
-//		final JSError[] errors = compiler.getErrors();
-//
-//		if (errors.length > 0) {
-//			throw new JavascriptParsingException("Cannot parse the Javascript file", errors);
-//		}
-//	}
+	// private void checkJavascriptErrors(final Compiler compiler) throws
+	// JavascriptParsingException {
+	// final JSError[] errors = compiler.getErrors();
+	//
+	// if (errors.length > 0) {
+	// throw new JavascriptParsingException("Cannot parse the Javascript file",
+	// errors);
+	// }
+	// }
 
 	private static String readContent(final String path) throws IOException {
 
